@@ -3,20 +3,124 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Eye, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Search, Eye, CheckCircle, Clock, XCircle, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const ReceiveItems = () => {
-  const [receivedItems, setReceivedItems] = useState([
-    { id: "REC001", requestId: "REQ001", department: "OR-1", items: "Surgery Kit", quantity: 2, receivedQty: 2, status: "Complete", date: "2024-06-10", time: "10:30" },
-    { id: "REC002", requestId: "REQ002", department: "OR-2", items: "Instruments", quantity: 5, receivedQty: 3, status: "Partial", date: "2024-06-10", time: "11:15" },
-    { id: "REC003", requestId: "REQ003", department: "ICU", items: "Medical Tools", quantity: 4, receivedQty: 0, status: "Pending", date: "2024-06-10", time: "12:00" }
-  ]);
+  const navigate = useNavigate();
+  const [receivedItems, setReceivedItems] = useState(() => {
+    const savedItems = localStorage.getItem('receivedItems');
+    try {
+      return savedItems ? JSON.parse(savedItems) : [
+        { id: "REC001", requestId: "REQ001", department: "Surgery", items: "Surgical Tools", quantity: 5, receivedQty: 5, status: "Complete", date: "2024-06-10", time: "12:00" },
+        { id: "REC002", requestId: "REQ002", department: "ICU", items: "Medical Tools", quantity: 4, receivedQty: 4, status: "Complete", date: "2024-06-10", time: "13:00" },
+        { id: "REC003", requestId: "REQ003", department: "ICU", items: "Medical Tools", quantity: 4, receivedQty: 0, status: "Pending", date: "2024-06-10", time: "12:00" }
+      ];
+    } catch (error) {
+      console.error('Error loading received items:', error);
+      return [
+        { id: "REC001", requestId: "REQ001", department: "Surgery", items: "Surgical Tools", quantity: 5, receivedQty: 5, status: "Complete", date: "2024-06-10", time: "12:00" },
+        { id: "REC002", requestId: "REQ002", department: "ICU", items: "Medical Tools", quantity: 4, receivedQty: 4, status: "Complete", date: "2024-06-10", time: "13:00" },
+        { id: "REC003", requestId: "REQ003", department: "ICU", items: "Medical Tools", quantity: 4, receivedQty: 0, status: "Pending", date: "2024-06-10", time: "12:00" }
+      ];
+    }
+  });
+  const [workflowItems, setWorkflowItems] = useState(() => {
+    const savedWorkflowItems = localStorage.getItem('workflowItems');
+    return savedWorkflowItems ? JSON.parse(savedWorkflowItems) : [
+      { requestId: "REQ001", currentStatus: "Ordered", timestamp: "2024-06-09T14:30:00.000Z", location: "Warehouse" },
+      { requestId: "REQ002", currentStatus: "Shipped", timestamp: "2024-06-09T16:00:00.000Z", location: "In Transit" },
+      { requestId: "REQ003", currentStatus: "Ordered", timestamp: "2024-06-09T10:00:00.000Z", location: "Warehouse" }
+    ];
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const updateItemStatus = (id: string, newStatus: string, receivedQty?: number) => {
+  useEffect(() => {
+    try {
+      localStorage.setItem('receivedItems', JSON.stringify(receivedItems));
+    } catch (error) {
+      console.error('Error saving received items:', error);
+    }
+  }, [receivedItems]);
+
+  useEffect(() => {
+    localStorage.setItem('workflowItems', JSON.stringify(workflowItems));
+  }, [workflowItems]);
+
+  useEffect(() => {
+    return () => {
+      setIsAddDialogOpen(false);
+      setIsViewDialogOpen(false);
+    };
+  }, []);
+
+  const handleReceiveItem = (event: React.FormEvent) => {
+    event.preventDefault();
+    const formData = new FormData(event.target as HTMLFormElement);
+    const newReceive = {
+      id: `REC${String(receivedItems.length + 1).padStart(3, '0')}`,
+      requestId: formData.get('requestId') as string,
+      department: formData.get('department') as string,
+      items: formData.get('items') as string,
+      quantity: parseInt(formData.get('quantity') as string),
+      receivedQty: parseInt(formData.get('receivedQty') as string),
+      status: "Partial",
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+    };
+
+    // Update status based on received quantity
+    if (newReceive.receivedQty === newReceive.quantity) {
+      newReceive.status = "Complete";
+    } else if (newReceive.receivedQty > 0) {
+      newReceive.status = "Partial";
+    } else {
+      newReceive.status = "Pending";
+    }
+
+    // Update workflow status
+    const updatedWorkflowItems = workflowItems.map(item => 
+      item.requestId === newReceive.requestId ? {
+        ...item,
+        currentStatus: "Received",
+        timestamp: new Date().toISOString(),
+        location: "Receiving Area"
+      } : item
+    );
+    setWorkflowItems(updatedWorkflowItems);
+
+    setReceivedItems(prev => [...prev, newReceive]);
+    setIsAddDialogOpen(false);
+    
+    toast({
+      title: "Item Received",
+      description: `Item ${newReceive.id} has been received successfully.`,
+    });
+  };
+
+  const handleUpdateStatus = (id: string, status: string) => {
+    setReceivedItems(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, status } : item
+      )
+    );
+  };
+
+  const viewItemDetails = (item) => {
+    setSelectedItem(item);
+    setIsViewDialogOpen(true);
+  };
+
+  const updateItemStatus = (id, newStatus, receivedQty) => {
     setReceivedItems(prevItems =>
       prevItems.map(item =>
         item.id === id 
@@ -38,12 +142,12 @@ const ReceiveItems = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status) => {
     switch (status) {
       case "Complete":
         return <CheckCircle className="w-4 h-4 text-green-600" />;
       case "Partial":
-        return <Clock className="w-4 h-4 text-gray-600" />;
+        return <Clock className="w-4 h-4 text-yellow-600" />;
       case "Pending":
         return <XCircle className="w-4 h-4 text-red-600" />;
       default:
@@ -51,12 +155,12 @@ const ReceiveItems = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case "Complete":
         return "bg-green-100 text-green-800";
       case "Partial":
-        return "bg-gray-100 text-gray-800";
+        return "bg-yellow-100 text-yellow-800";
       case "Pending":
         return "bg-red-100 text-red-800";
       default:
@@ -65,30 +169,72 @@ const ReceiveItems = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Receive Items</h1>
-        <p className="text-gray-600">Manage received requests and update status</p>
+    <div className="space-y-4 sm:space-y-6 bg-gray-50 min-h-screen p-4 sm:p-6">
+      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Receive Items</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">Manage received requests and update status</p>
+          </div>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Receive Item
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-white">
+              <DialogHeader>
+                <DialogTitle>Add New Receive Item</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleReceiveItem} className="space-y-4">
+                <div>
+                  <Label htmlFor="requestId">Request ID</Label>
+                  <Input name="requestId" placeholder="Enter request ID" required className="border-gray-300" />
+                </div>
+                <div>
+                  <Label htmlFor="department">Department</Label>
+                  <Input name="department" placeholder="Enter department" required className="border-gray-300" />
+                </div>
+                <div>
+                  <Label htmlFor="items">Items</Label>
+                  <Input name="items" placeholder="Enter items description" required className="border-gray-300" />
+                </div>
+                <div>
+                  <Label htmlFor="quantity">Quantity</Label>
+                  <Input name="quantity" type="number" placeholder="Enter quantity" required className="border-gray-300" />
+                </div>
+                <div>
+                  <Label htmlFor="receivedQty">Received Quantity</Label>
+                  <Input name="receivedQty" type="number" placeholder="Enter received quantity" required className="border-gray-300" />
+                </div>
+                <Button type="submit" className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+                  Add Item
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Received Items Management</CardTitle>
-          <div className="flex gap-4">
+      <Card className="bg-white shadow-sm">
+        <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl text-gray-900 mb-4">Received Items Management</CardTitle>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input 
                 placeholder="Search by ID, Request ID, or Department..." 
-                className="pl-10"
+                className="pl-10 border-gray-300 hover:border-gray-400 focus:border-[#00A8E8] focus:ring-[#00A8E8]"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48 border-gray-300 hover:border-gray-400 focus:border-[#00A8E8]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="complete">Complete</SelectItem>
                 <SelectItem value="partial">Partial</SelectItem>
@@ -97,30 +243,29 @@ const ReceiveItems = () => {
             </Select>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-3">Receipt ID</th>
-                  <th className="text-left p-3">Request ID</th>
-                  <th className="text-left p-3">Department</th>
-                  <th className="text-left p-3">Items</th>
-                  <th className="text-left p-3">Requested Qty</th>
-                  <th className="text-left p-3">Received Qty</th>
-                  <th className="text-left p-3">Status</th>
-                  <th className="text-left p-3">Date & Time</th>
-                  <th className="text-left p-3">Actions</th>
+            <table className="w-full min-w-[800px]">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Receipt ID</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Request ID</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Department</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Items</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Requested Qty</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Received Qty</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Status</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Date & Time</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredItems.map((item) => (
-                  <tr key={item.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3 font-medium">{item.id}</td>
-                    <td className="p-3">{item.requestId}</td>
-                    <td className="p-3">{item.department}</td>
-                    <td className="p-3">{item.items}</td>
-                    <td className="p-3">{item.quantity}</td>
+                  <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="p-3 font-medium text-gray-900 text-sm">{item.id}</td>
+                    <td className="p-3 text-gray-900 text-sm">{item.requestId}</td>
+                    <td className="p-3 text-gray-900 text-sm">{item.department}</td>
+                    <td className="p-3 text-gray-900 text-sm">{item.items}</td>
+                    <td className="p-3 text-gray-900 text-sm">{item.quantity}</td>
                     <td className="p-3">
                       <Input 
                         type="number" 
@@ -131,7 +276,7 @@ const ReceiveItems = () => {
                                           newQty < item.quantity ? "Partial" : "Complete";
                           updateItemStatus(item.id, newStatus, newQty);
                         }}
-                        className="w-20"
+                        className="w-16 sm:w-20 border-gray-300 hover:border-gray-400 focus:border-[#00A8E8] text-sm"
                         min="0"
                         max={item.quantity}
                       />
@@ -139,30 +284,28 @@ const ReceiveItems = () => {
                     <td className="p-3">
                       <div className="flex items-center gap-2">
                         {getStatusIcon(item.status)}
-                        <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(item.status)}`}>
-                          {item.status}
-                        </span>
+                        <Select 
+                          value={item.status}
+                          onValueChange={(newStatus) => {
+                            handleUpdateStatus(item.id, newStatus);
+                          }}
+                          className="w-full sm:w-48 border-gray-300 hover:border-gray-400 focus:border-[#00A8E8]"
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white">
+                            <SelectItem value="Pending">Pending</SelectItem>
+                            <SelectItem value="Partial">Partial</SelectItem>
+                            <SelectItem value="Complete">Complete</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </td>
                     <td className="p-3">
                       <div className="text-sm">
-                        <div>{item.date}</div>
-                        <div className="text-gray-500">{item.time}</div>
-                      </div>
-                    </td>
-                    <td className="p-3">
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => updateItemStatus(item.id, "Complete", item.quantity)}
-                          disabled={item.status === "Complete"}
-                        >
-                          Complete
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                        <div className="text-gray-900">{item.date}</div>
+                        <div className="text-gray-500 text-xs">{item.time}</div>
                       </div>
                     </td>
                   </tr>
@@ -173,49 +316,109 @@ const ReceiveItems = () => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-600">
+      {/* View Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>Item Details</DialogTitle>
+          </DialogHeader>
+          {selectedItem && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Receipt ID</Label>
+                  <p className="font-medium">{selectedItem.id}</p>
+                </div>
+                <div>
+                  <Label>Request ID</Label>
+                  <p className="font-medium">{selectedItem.requestId}</p>
+                </div>
+                <div>
+                  <Label>Department</Label>
+                  <p className="font-medium">{selectedItem.department}</p>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(selectedItem.status)}
+                    <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(selectedItem.status)}`}>
+                      {selectedItem.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label>Items</Label>
+                <p className="font-medium">{selectedItem.items}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Requested Quantity</Label>
+                  <p className="font-medium">{selectedItem.quantity}</p>
+                </div>
+                <div>
+                  <Label>Received Quantity</Label>
+                  <p className="font-medium">{selectedItem.receivedQty}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Date</Label>
+                  <p className="font-medium">{selectedItem.date}</p>
+                </div>
+                <div>
+                  <Label>Time</Label>
+                  <p className="font-medium">{selectedItem.time}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <Card className="bg-white shadow-sm">
+          <CardHeader className="border-b border-gray-200 p-4">
+            <CardTitle className="flex items-center gap-2 text-green-600 text-base">
               <CheckCircle className="w-5 h-5" />
               Complete
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
+          <CardContent className="p-4">
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
               {filteredItems.filter(item => item.status === "Complete").length}
             </div>
-            <p className="text-sm text-gray-600">Items fully received</p>
+            <p className="text-xs sm:text-sm text-gray-600">Items fully received</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-600">
+        <Card className="bg-white shadow-sm">
+          <CardHeader className="border-b border-gray-200 p-4">
+            <CardTitle className="flex items-center gap-2 text-yellow-600 text-base">
               <Clock className="w-5 h-5" />
               Partial
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
+          <CardContent className="p-4">
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
               {filteredItems.filter(item => item.status === "Partial").length}
             </div>
-            <p className="text-sm text-gray-600">Partially received items</p>
+            <p className="text-xs sm:text-sm text-gray-600">Partially received items</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-600">
+        <Card className="bg-white shadow-sm">
+          <CardHeader className="border-b border-gray-200 p-4">
+            <CardTitle className="flex items-center gap-2 text-red-600 text-base">
               <XCircle className="w-5 h-5" />
               Pending
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
+          <CardContent className="p-4">
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
               {filteredItems.filter(item => item.status === "Pending").length}
             </div>
-            <p className="text-sm text-gray-600">Awaiting receipt</p>
+            <p className="text-xs sm:text-sm text-gray-600">Awaiting receipt</p>
           </CardContent>
         </Card>
       </div>

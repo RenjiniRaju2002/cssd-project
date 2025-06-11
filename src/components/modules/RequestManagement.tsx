@@ -7,10 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Plus, Search, Filter, Eye, Package } from "lucide-react";
+import { CalendarIcon, Plus, Search, Filter, Eye, Package, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useLocation } from "react-router-dom";
 
 const RequestManagement = () => {
   const [requests, setRequests] = useState([
@@ -18,6 +19,10 @@ const RequestManagement = () => {
     { id: "REQ002", department: "OR-2", priority: "Medium", items: "Instruments", quantity: 5, status: "Processing", date: "2024-06-10" },
     { id: "REQ003", department: "ICU", priority: "Low", items: "Basic Kit", quantity: 3, status: "Completed", date: "2024-06-09" }
   ]);
+
+  const { search } = useLocation();
+  const queryParams = new URLSearchParams(search);
+  const searchId = queryParams.get('search');
 
   // Load requests from localStorage on component mount
   useEffect(() => {
@@ -44,6 +49,52 @@ const RequestManagement = () => {
     { id: "KIT001", name: "Basic Surgery Kit", items: ["Forceps", "Scissors", "Clamps"], department: "OR-1" },
     { id: "KIT002", name: "Cardiac Kit", items: ["Cardiac Forceps", "Retractors", "Sutures"], department: "OR-2" }
   ]);
+
+  // Delete request functionality
+  const handleDeleteRequest = (requestId: string) => {
+    // Remove from requests
+    setRequests(prevRequests => {
+      const updatedRequests = prevRequests.filter(request => request.id !== requestId);
+      localStorage.setItem('cssdRequests', JSON.stringify(updatedRequests));
+      return updatedRequests;
+    });
+
+    // Remove from workflow items
+    setWorkflowItems(prevWorkflow => {
+      const updatedWorkflow = prevWorkflow.filter(item => item.requestId !== requestId);
+      localStorage.setItem('cssdWorkflowItems', JSON.stringify(updatedWorkflow));
+      return updatedWorkflow;
+    });
+  };
+
+  // Load package kits from localStorage on component mount
+  useEffect(() => {
+    const savedKits = localStorage.getItem('cssdPackageKits');
+    if (savedKits) {
+      setPackageKits(JSON.parse(savedKits));
+    }
+  }, []);
+
+  // Save package kits to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('cssdPackageKits', JSON.stringify(packageKits));
+  }, [packageKits]);
+
+  const [workflowItems, setWorkflowItems] = useState([]);
+
+  // Load workflow items from localStorage on component mount
+  useEffect(() => {
+    const savedWorkflowItems = localStorage.getItem('cssdWorkflowItems');
+    if (savedWorkflowItems) {
+      setWorkflowItems(JSON.parse(savedWorkflowItems));
+    }
+  }, []);
+
+  // Save workflow items to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('cssdWorkflowItems', JSON.stringify(workflowItems));
+  }, [workflowItems]);
+
   const { toast } = useToast();
 
   const generateRequestId = () => {
@@ -56,12 +107,25 @@ const RequestManagement = () => {
     const newRequest = {
       id: generateRequestId(),
       department: formData.get('department') as string,
-      priority: formData.get('priority') as string,
       items: formData.get('items') as string,
       quantity: parseInt(formData.get('quantity') as string),
-      status: "Pending",
-      date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : new Date().toISOString().split('T')[0]
+      status: "Requested",
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
     };
+
+    // Add to workflow tracking
+    const workflowItem = {
+      id: newRequest.id,
+      requestId: newRequest.id,
+      kitId: "",
+      sterilizationId: "",
+      currentStatus: "Requested",
+      timestamp: new Date().toISOString(),
+      location: "Request Queue"
+    };
+    
+    setWorkflowItems([...workflowItems, workflowItem]);
     
     setRequests([...requests, newRequest]);
     toast({
@@ -75,19 +139,80 @@ const RequestManagement = () => {
   const handleCreateKit = (event: React.FormEvent) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
+    const newKitId = `KIT${String(packageKits.length + 1).padStart(3, '0')}`;
     const newKit = {
-      id: `KIT${String(packageKits.length + 1).padStart(3, '0')}`,
+      id: newKitId,
       name: formData.get('kitName') as string,
       items: (formData.get('kitItems') as string).split(',').map(item => item.trim()),
-      department: formData.get('kitDepartment') as string
+      department: formData.get('kitDepartment') as string,
+      priority: formData.get('priority') as string,
+      status: formData.get('status') as string,
+      quantity: parseInt(formData.get('quantity') as string),
+      date: formData.get('date') as string
     };
     
-    setPackageKits([...packageKits, newKit]);
+    // Create request for the new kit
+    const newRequestId = `REQ${String(requests.length + 1).padStart(3, '0')}`;
+    const newRequest = {
+      id: newRequestId,
+      department: formData.get('kitDepartment') as string,
+      items: newKit.name,
+      quantity: newKit.quantity,
+      priority: newKit.priority,
+      status: newKit.status,
+      date: newKit.date,
+      time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+    };
+
+    // Add to workflow tracking
+    const workflowItem = {
+      id: newRequestId,
+      requestId: newRequestId,
+      kitId: newKitId,
+      sterilizationId: "",
+      currentStatus: newKit.status,
+      timestamp: new Date().toISOString(),
+      location: "Request Queue"
+    };
+    
+    // Update states
+    setPackageKits(prevKits => [...prevKits, newKit]);
+    setRequests(prevRequests => [...prevRequests, newRequest]);
+    setWorkflowItems(prevWorkflow => [...prevWorkflow, workflowItem]);
+    
+    // Save to localStorage
+    localStorage.setItem('cssdPackageKits', JSON.stringify([...packageKits, newKit]));
+    localStorage.setItem('cssdRequests', JSON.stringify([...requests, newRequest]));
+    localStorage.setItem('cssdWorkflowItems', JSON.stringify([...workflowItems, workflowItem]));
+    
     toast({
       title: "Package Kit Created",
-      description: `Kit ${newKit.id} has been created successfully.`,
+      description: `Kit ${newKitId} and Request ${newRequestId} have been created successfully.`,
     });
+    
+    // Close the dialog
     setShowCreateKit(false);
+    
+    // Reset form
+    (event.target as HTMLFormElement).reset();
+  };
+
+  const handleDeleteKit = (kitId: string) => {
+    const updatedKits = packageKits.filter(kit => kit.id !== kitId);
+    setPackageKits(updatedKits);
+    
+    // Save to localStorage immediately
+    localStorage.setItem('cssdPackageKits', JSON.stringify(updatedKits));
+    
+    toast({
+      title: "Kit Deleted",
+      description: `Kit has been deleted successfully.`,
+    });
+  };
+
+  const handleViewKit = (kit: any) => {
+    setSelectedRequest(kit);
+    setShowRequestDetails(true);
   };
 
   const handleViewRequest = (request: any) => {
@@ -95,23 +220,51 @@ const RequestManagement = () => {
     setShowRequestDetails(true);
   };
 
+  const handleStatusChange = (request: any) => {
+    setSelectedRequest(request);
+    setShowStatusChange(true);
+  };
+
   const handleUpdateStatus = (requestId: string, newStatus: string) => {
-    const updatedRequests = requests.map(request => 
-      request.id === requestId ? { ...request, status: newStatus } : request
-    );
-    setRequests(updatedRequests);
+    // Update requests state
+    setRequests(prevRequests => {
+      const updatedRequests = prevRequests.map(request => 
+        request.id === requestId ? { ...request, status: newStatus } : request
+      );
+      localStorage.setItem('cssdRequests', JSON.stringify(updatedRequests));
+      return updatedRequests;
+    });
+
+    // Update workflow items
+    setWorkflowItems(prevWorkflow => {
+      const updatedWorkflow = prevWorkflow.map(item =>
+        item.requestId === requestId ? { ...item, currentStatus: newStatus } : item
+      );
+      localStorage.setItem('cssdWorkflowItems', JSON.stringify(updatedWorkflow));
+      return updatedWorkflow;
+    });
+
+    // Close status change dialog
+    setShowStatusChange(false);
+
     toast({
       title: "Status Updated",
       description: `Request ${requestId} status has been updated to ${newStatus}.`,
     });
   };
 
-  const handleStatusChange = (request: any) => {
-    setSelectedRequest(request);
-    setShowStatusChange(true);
-  };
+  // Filter package kits based on search term
+  const filteredKits = packageKits.filter(kit => 
+    kit.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    kit.department.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const filteredRequests = requests.filter(request => {
+  const filteredRequests = searchId ? 
+    requests.filter(request => 
+      request.id === searchId || 
+      request.items.includes(searchId) || 
+      request.department.includes(searchId)
+    ) : requests.filter(request => {
     const matchesSearch = request.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          request.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          request.items.toLowerCase().includes(searchTerm.toLowerCase());
@@ -144,7 +297,7 @@ const RequestManagement = () => {
                   <Label htmlFor="department" className="text-gray-700">Department</Label>
                   <Select name="department" required>
                     <SelectTrigger className="border-gray-300">
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder="Select department " />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
                       <SelectItem value="OR-1">OR-1</SelectItem>
@@ -231,25 +384,68 @@ const RequestManagement = () => {
                       <Input name="kitName" placeholder="Enter kit name" required className="border-gray-300" />
                     </div>
                     <div>
-                      <Label htmlFor="kitItems" className="text-gray-700">Items (comma separated)</Label>
-                      <Textarea name="kitItems" placeholder="Forceps, Scissors, Clamps" required className="border-gray-300" />
+                      <Label htmlFor="kitItems" className="text-gray-700">Kit Items (comma-separated)</Label>
+                      <Textarea name="kitItems" placeholder="Enter items separated by commas" required className="border-gray-300" />
                     </div>
                     <div>
                       <Label htmlFor="kitDepartment" className="text-gray-700">Department</Label>
-                      <Select name="kitDepartment" required>
+                      <Input name="kitDepartment" placeholder="Enter department" required className="border-gray-300" />
+                    </div>
+                    <div>
+                      <Label htmlFor="priority" className="text-gray-700">Priority</Label>
+                      <Select name="priority" required>
                         <SelectTrigger className="border-gray-300">
-                          <SelectValue placeholder="Select department" />
+                          <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
-                          <SelectItem value="OR-1">OR-1</SelectItem>
-                          <SelectItem value="OR-2">OR-2</SelectItem>
-                          <SelectItem value="OR-3">OR-3</SelectItem>
-                          <SelectItem value="ICU">ICU</SelectItem>
+                        <SelectContent className="bg-white border-0">
+                          <SelectItem value="High">High</SelectItem>
+                          <SelectItem value="Medium">Medium</SelectItem>
+                          <SelectItem value="Low">Low</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
+                    <div>
+                      <Label htmlFor="status" className="text-gray-700">Status</Label>
+                      <Select name="status" required>
+                        <SelectTrigger className="border-gray-300">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-0">
+                          <SelectItem value="Requested">Requested</SelectItem>
+                          <SelectItem value="Pending">Pending</SelectItem>
+                          <SelectItem value="Processing">Processing</SelectItem>
+                          <SelectItem value="Completed">Completed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="quantity" className="text-gray-700">Quantity</Label>
+                      <Input name="quantity" type="number" placeholder="Enter quantity" required className="border-gray-300" />
+                    </div>
+                    <div>
+                      <Label htmlFor="date" className="text-gray-700">Required By Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={"w-full justify-start text-left font-normal border-gray-300 hover:bg-gray-50"}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={setSelectedDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                     <Button type="submit" className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white">
-                      Create Kit
+                      Create Package Kit
                     </Button>
                   </form>
                 </DialogContent>
@@ -257,21 +453,56 @@ const RequestManagement = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <Input 
+                placeholder="Search kits..." 
+                className="border-gray-300 w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
             <div className="space-y-3 max-h-64 overflow-y-auto">
-              {packageKits.map((kit) => (
-                <div key={kit.id} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-medium text-gray-900">{kit.name}</h4>
-                      <p className="text-sm text-gray-600">{kit.department}</p>
-                      <p className="text-xs text-gray-500">{kit.items.join(', ')}</p>
-                    </div>
-                    <Button variant="ghost" size="sm" className="text-[#00A8E8] hover:bg-blue-50">
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  </div>
+              {filteredKits.length === 0 ? (
+                <div className="text-center py-4 text-gray-500">
+                  No kits found
                 </div>
-              ))}
+              ) : (
+                filteredKits.map((kit) => (
+                  <div key={kit.id} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium text-gray-900">{kit.name}</h4>
+                        <p className="text-sm text-gray-600">{kit.department}</p>
+                        <div className="mt-2 space-y-1">
+                          {kit.items.map((item, index) => (
+                            <span key={index} className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleViewKit(kit)}
+                          className="text-black hover:bg-gray-100 hover:text-black focus:text-black active:text-black"
+                        >
+                          <Eye className="w-4 h-4 text-black" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDeleteKit(kit.id)}
+                          className="text-black hover:bg-gray-100 hover:text-black focus:text-black active:text-black"
+                        >
+                          <Trash2 className="w-4 h-4 text-black" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -372,6 +603,14 @@ const RequestManagement = () => {
                       >
                         Change Status
                       </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleDeleteRequest(request.id)}
+                        className="text-red-600 hover:bg-red-50 hover:text-red-900"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -464,8 +703,10 @@ const RequestManagement = () => {
                 <Label htmlFor="newStatus" className="text-gray-700">Status</Label>
                 <Select 
                   id="newStatus"
-                  value={selectedRequest.status} 
-                  onValueChange={(value) => handleUpdateStatus(selectedRequest.id, value)}
+                  value={selectedRequest?.status || ""} 
+                  onValueChange={(value) => {
+                    handleUpdateStatus(selectedRequest?.id || "", value);
+                  }}
                   className="w-full"
                 >
                   <SelectTrigger className="border-gray-300">

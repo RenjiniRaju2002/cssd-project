@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
@@ -39,6 +38,29 @@ const ConsumptionReports = () => {
     { department: "Emergency", count: 8 }
   ];
 
+  const generateReport = () => {
+    if (!dateFrom || !dateTo) {
+      toast({
+        title: "Select Date Range",
+        description: "Please select both from and to dates to generate the report.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log("Generating report with parameters:", {
+      dateFrom: format(dateFrom, "dd/MM/yyyy"),
+      dateTo: format(dateTo, "dd/MM/yyyy"),
+      department: selectedDepartment
+    });
+    
+    setReportGenerated(true);
+    toast({
+      title: "Report Generated Successfully",
+      description: `Consumption report generated for ${selectedDepartment === "all" ? "all departments" : selectedDepartment} from ${format(dateFrom, "dd/MM/yyyy")} to ${format(dateTo, "dd/MM/yyyy")}.`,
+    });
+  };
+
   const exportToPDF = () => {
     if (!reportGenerated) {
       toast({
@@ -49,7 +71,6 @@ const ConsumptionReports = () => {
       return;
     }
     
-    // Simulate PDF generation
     const reportData = {
       dateFrom: dateFrom ? format(dateFrom, "dd/MM/yyyy") : "N/A",
       dateTo: dateTo ? format(dateTo, "dd/MM/yyyy") : "N/A",
@@ -58,7 +79,16 @@ const ConsumptionReports = () => {
       data: consumptionData
     };
     
-    console.log("Generating PDF with data:", reportData);
+    console.log("Exporting to PDF with data:", reportData);
+    
+    // Simulate PDF download
+    const element = document.createElement('a');
+    const file = new Blob([JSON.stringify(reportData, null, 2)], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = `consumption-report-${format(new Date(), 'yyyy-MM-dd')}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
     
     toast({
       title: "PDF Export Successful",
@@ -76,27 +106,25 @@ const ConsumptionReports = () => {
       return;
     }
     
-    // Simulate Excel generation
+    const csvContent = [
+      ['Surgery ID', 'Surgery Type', 'Department', 'Date', 'Before Count', 'After Count', 'Consumed', 'Items Used'],
+      ...consumptionData.map(item => [
+        item.id, item.surgery, item.department, item.date, 
+        item.beforeCount, item.afterCount, item.consumed, item.items
+      ])
+    ].map(row => row.join(',')).join('\n');
+    
+    const element = document.createElement('a');
+    const file = new Blob([csvContent], { type: 'text/csv' });
+    element.href = URL.createObjectURL(file);
+    element.download = `consumption-report-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    
     toast({
       title: "Excel Export Successful",
       description: "Consumption report has been exported to Excel successfully.",
-    });
-  };
-
-  const generateReport = () => {
-    if (!dateFrom || !dateTo) {
-      toast({
-        title: "Select Date Range",
-        description: "Please select both from and to dates to generate the report.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setReportGenerated(true);
-    toast({
-      title: "Report Generated Successfully",
-      description: `Consumption report generated for ${selectedDepartment === "all" ? "all departments" : selectedDepartment} from ${format(dateFrom, "dd/MM/yyyy")} to ${format(dateTo, "dd/MM/yyyy")}.`,
     });
   };
 
@@ -104,26 +132,26 @@ const ConsumptionReports = () => {
   const averageConsumption = (totalConsumption / consumptionData.length).toFixed(1);
 
   return (
-    <div className="space-y-6 bg-gray-50 min-h-screen p-6">
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-3xl font-bold text-gray-900">Consumption Reports</h1>
-        <p className="text-gray-600">Generate and analyze item consumption reports</p>
+    <div className="space-y-4 sm:space-y-6 bg-gray-50 min-h-screen p-4 sm:p-6">
+      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Consumption Reports</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Generate and analyze item consumption reports</p>
       </div>
 
       <Card className="bg-white shadow-sm">
-        <CardHeader className="border-b border-gray-200">
-          <CardTitle className="flex items-center gap-2 text-gray-900">
+        <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
             <BarChart3 className="w-5 h-5 text-[#00A8E8]" />
             Report Filters
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <Label className="text-gray-700">From Date</Label>
+              <Label className="text-gray-700 text-sm">From Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left border-gray-300">
+                  <Button variant="outline" className="w-full justify-start text-left border-gray-300 hover:border-gray-400 mt-1">
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateFrom ? format(dateFrom, "PPP") : "Select date"}
                   </Button>
@@ -140,10 +168,10 @@ const ConsumptionReports = () => {
             </div>
 
             <div>
-              <Label className="text-gray-700">To Date</Label>
+              <Label className="text-gray-700 text-sm">To Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left border-gray-300">
+                  <Button variant="outline" className="w-full justify-start text-left border-gray-300 hover:border-gray-400 mt-1">
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateTo ? format(dateTo, "PPP") : "Select date"}
                   </Button>
@@ -160,9 +188,9 @@ const ConsumptionReports = () => {
             </div>
 
             <div>
-              <Label className="text-gray-700">Department</Label>
+              <Label className="text-gray-700 text-sm">Department</Label>
               <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                <SelectTrigger className="border-gray-300">
+                <SelectTrigger className="border-gray-300 hover:border-gray-400 focus:border-[#00A8E8] mt-1">
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
@@ -206,66 +234,53 @@ const ConsumptionReports = () => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-blue-600">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <Card className="bg-white shadow-sm">
+          <CardHeader className="border-b border-gray-200 p-4">
+            <CardTitle className="flex items-center gap-2 text-blue-600 text-base">
               <BarChart3 className="w-5 h-5" />
               Total Consumption
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{totalConsumption}</div>
-            <p className="text-sm text-gray-600">Items consumed</p>
+          <CardContent className="p-4">
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{totalConsumption}</div>
+            <p className="text-xs sm:text-sm text-gray-600">Items consumed</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-600">
+        <Card className="bg-white shadow-sm">
+          <CardHeader className="border-b border-gray-200 p-4">
+            <CardTitle className="flex items-center gap-2 text-green-600 text-base">
               <TrendingUp className="w-5 h-5" />
               Average per Surgery
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{averageConsumption}</div>
-            <p className="text-sm text-gray-600">Items per procedure</p>
+          <CardContent className="p-4">
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{averageConsumption}</div>
+            <p className="text-xs sm:text-sm text-gray-600">Items per procedure</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-purple-600">
+        <Card className="bg-white shadow-sm">
+          <CardHeader className="border-b border-gray-200 p-4">
+            <CardTitle className="flex items-center gap-2 text-purple-600 text-base">
               <BarChart3 className="w-5 h-5" />
               Total Surgeries
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{consumptionData.length}</div>
-            <p className="text-sm text-gray-600">Procedures tracked</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-orange-600">
-              <TrendingDown className="w-5 h-5" />
-              Efficiency Rate
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">94%</div>
-            <p className="text-sm text-gray-600">Utilization efficiency</p>
+          <CardContent className="p-4">
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{consumptionData.length}</div>
+            <p className="text-xs sm:text-sm text-gray-600">Procedures tracked</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly Consumption Trend</CardTitle>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <Card className="bg-white shadow-sm">
+          <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
+            <CardTitle className="text-lg text-gray-900">Weekly Consumption Trend</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={weeklyData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -279,11 +294,11 @@ const ConsumptionReports = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Department-wise Consumption</CardTitle>
+        <Card className="bg-white shadow-sm">
+          <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
+            <CardTitle className="text-lg text-gray-900">Outlet-wise Consumption</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={departmentData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -298,35 +313,35 @@ const ConsumptionReports = () => {
       </div>
 
       <Card className="bg-white shadow-sm">
-        <CardHeader className="border-b border-gray-200">
-          <CardTitle className="text-gray-900">Surgery Item Consumption Details</CardTitle>
+        <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
+          <CardTitle className="text-lg text-gray-900">Surgery Item Consumption Details</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[900px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="text-left p-4 text-gray-700 font-medium">Surgery ID</th>
-                  <th className="text-left p-4 text-gray-700 font-medium">Surgery Type</th>
-                  <th className="text-left p-4 text-gray-700 font-medium">Department</th>
-                  <th className="text-left p-4 text-gray-700 font-medium">Date</th>
-                  <th className="text-left p-4 text-gray-700 font-medium">Before Count</th>
-                  <th className="text-left p-4 text-gray-700 font-medium">After Count</th>
-                  <th className="text-left p-4 text-gray-700 font-medium">Consumed</th>
-                  <th className="text-left p-4 text-gray-700 font-medium">Items Used</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Surgery ID</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Surgery Type</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Department</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Date</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Before Count</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">After Count</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Consumed</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Items Used</th>
                 </tr>
               </thead>
               <tbody>
                 {consumptionData.map((surgery) => (
                   <tr key={surgery.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="p-4 font-medium text-gray-900">{surgery.id}</td>
-                    <td className="p-4 text-gray-900">{surgery.surgery}</td>
-                    <td className="p-4 text-gray-600">{surgery.department}</td>
-                    <td className="p-4 text-gray-600">{surgery.date}</td>
-                    <td className="p-4 text-center text-gray-900">{surgery.beforeCount}</td>
-                    <td className="p-4 text-center text-gray-900">{surgery.afterCount}</td>
-                    <td className="p-4 text-center font-medium text-red-600">{surgery.consumed}</td>
-                    <td className="p-4 text-gray-600">{surgery.items}</td>
+                    <td className="p-3 font-medium text-gray-900 text-sm">{surgery.id}</td>
+                    <td className="p-3 text-gray-900 text-sm">{surgery.surgery}</td>
+                    <td className="p-3 text-gray-600 text-sm">{surgery.department}</td>
+                    <td className="p-3 text-gray-600 text-sm">{surgery.date}</td>
+                    <td className="p-3 text-center text-gray-900 text-sm">{surgery.beforeCount}</td>
+                    <td className="p-3 text-center text-gray-900 text-sm">{surgery.afterCount}</td>
+                    <td className="p-3 text-center font-medium text-red-600 text-sm">{surgery.consumed}</td>
+                    <td className="p-3 text-gray-600 text-sm">{surgery.items}</td>
                   </tr>
                 ))}
               </tbody>

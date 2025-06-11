@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +8,19 @@ import { Search, Send, Clock, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const IssueItem = () => {
-  const [issuedItems, setIssuedItems] = useState([
-    { id: "ISS001", requestId: "REQ001", department: "OR-1", items: "Surgery Kit", quantity: 2, issuedTime: "14:30", issuedDate: "2024-06-10", status: "Issued" },
-    { id: "ISS002", requestId: "REQ002", department: "OR-2", items: "Instruments", quantity: 3, issuedTime: "15:15", issuedDate: "2024-06-10", status: "Issued" }
-  ]);
+  const [issuedItems, setIssuedItems] = useState(() => {
+    const savedItems = localStorage.getItem('issuedItems');
+    return savedItems ? JSON.parse(savedItems) : [
+      { id: "ISS001", requestId: "REQ001", department: "OR-1", items: "Surgery Kit", quantity: 2, issuedTime: "14:30", issuedDate: "2024-06-10", status: "Issued" },
+      { id: "ISS002", requestId: "REQ002", department: "OR-2", items: "Instruments", quantity: 3, issuedTime: "15:15", issuedDate: "2024-06-10", status: "Issued" }
+    ];
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    localStorage.setItem('issuedItems', JSON.stringify(issuedItems));
+  }, [issuedItems]);
 
   const availableItems = [
     { id: "REQ001", department: "OR-1", items: "Surgery Kit", quantity: 2, status: "Sterilized", readyTime: "14:00" },
@@ -57,29 +63,29 @@ const IssueItem = () => {
   );
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="space-y-6 bg-gray-50 min-h-screen p-6">
+      <div className="bg-white rounded-lg shadow-sm p-6 border-0">
         <h1 className="text-3xl font-bold text-gray-900">Issue Item</h1>
         <p className="text-gray-600">Issue sterilized items to departments and outlets</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Send className="w-5 h-5" />
+        <Card className="bg-white shadow-sm border-0">
+          <CardHeader className="border-b border-gray-200">
+            <CardTitle className="flex items-center gap-2 text-gray-900">
+              <Send className="w-5 h-5 text-[#00A8E8]" />
               Issue Items
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <form onSubmit={handleIssueItem} className="space-y-4">
               <div>
-                <Label htmlFor="requestId">Request ID</Label>
+                <Label htmlFor="requestId" className="text-gray-700">Request ID</Label>
                 <Select name="requestId" required>
-                  <SelectTrigger>
+                  <SelectTrigger className="border-gray-300">
                     <SelectValue placeholder="Select request to issue" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border-0">
                     {availableItems.map((item) => (
                       <SelectItem key={item.id} value={item.id}>
                         {item.id} - {item.items} ({item.quantity} units)
@@ -90,12 +96,12 @@ const IssueItem = () => {
               </div>
 
               <div>
-                <Label htmlFor="outlet">Department/Outlet</Label>
+                <Label htmlFor="outlet" className="text-gray-700">Department/Outlet</Label>
                 <Select name="outlet" required>
-                  <SelectTrigger>
+                  <SelectTrigger className="border-gray-300">
                     <SelectValue placeholder="Select destination" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border-0">
                     <SelectItem value="OR-1">Operating Room 1</SelectItem>
                     <SelectItem value="OR-2">Operating Room 2</SelectItem>
                     <SelectItem value="OR-3">Operating Room 3</SelectItem>
@@ -109,44 +115,46 @@ const IssueItem = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Issue Time</Label>
+                  <Label className="text-gray-700">Issue Time</Label>
                   <Input 
                     type="time" 
                     defaultValue={new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })}
                     readOnly
+                    className="border-gray-300 bg-gray-50"
                   />
                 </div>
                 <div>
-                  <Label>Issue Date</Label>
+                  <Label className="text-gray-700">Issue Date</Label>
                   <Input 
                     type="date" 
                     defaultValue={new Date().toISOString().split('T')[0]}
                     readOnly
+                    className="border-gray-300 bg-gray-50"
                   />
                 </div>
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white">
                 Issue Item
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5" />
+        <Card className="bg-white shadow-sm border-0">
+          <CardHeader className="border-b border-gray-200">
+            <CardTitle className="flex items-center gap-2 text-gray-900">
+              <CheckCircle className="w-5 h-5 text-[#00A8E8]" />
               Available Items
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {availableItems.map((item) => (
-                <div key={item.id} className="p-3 border rounded-lg hover:bg-gray-50">
+                <div key={item.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 bg-white">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className="font-medium">{item.id}</h4>
+                      <h4 className="font-medium text-gray-900">{item.id}</h4>
                       <p className="text-sm text-gray-600">{item.items}</p>
                       <p className="text-xs text-gray-500">Qty: {item.quantity} | Ready: {item.readyTime}</p>
                     </div>
@@ -161,47 +169,47 @@ const IssueItem = () => {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5" />
+      <Card className="bg-white shadow-sm border-0">
+        <CardHeader className="border-b border-gray-200">
+          <CardTitle className="flex items-center gap-2 text-gray-900">
+            <Clock className="w-5 h-5 text-[#00A8E8]" />
             Issue History
           </CardTitle>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input 
               placeholder="Search issued items..." 
-              className="pl-10 max-w-sm"
+              className="pl-10 max-w-sm border-gray-300"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-3">Issue ID</th>
-                  <th className="text-left p-3">Request ID</th>
-                  <th className="text-left p-3">Department</th>
-                  <th className="text-left p-3">Items</th>
-                  <th className="text-left p-3">Quantity</th>
-                  <th className="text-left p-3">Issue Time</th>
-                  <th className="text-left p-3">Issue Date</th>
-                  <th className="text-left p-3">Status</th>
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left p-3 text-gray-700 font-medium">Issue ID</th>
+                  <th className="text-left p-3 text-gray-700 font-medium">Request ID</th>
+                  <th className="text-left p-3 text-gray-700 font-medium">Department</th>
+                  <th className="text-left p-3 text-gray-700 font-medium">Items</th>
+                  <th className="text-left p-3 text-gray-700 font-medium">Quantity</th>
+                  <th className="text-left p-3 text-gray-700 font-medium">Issue Time</th>
+                  <th className="text-left p-3 text-gray-700 font-medium">Issue Date</th>
+                  <th className="text-left p-3 text-gray-700 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredIssuedItems.map((item) => (
-                  <tr key={item.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3 font-medium">{item.id}</td>
-                    <td className="p-3">{item.requestId}</td>
-                    <td className="p-3">{item.department}</td>
-                    <td className="p-3">{item.items}</td>
-                    <td className="p-3">{item.quantity}</td>
-                    <td className="p-3">{item.issuedTime}</td>
-                    <td className="p-3">{item.issuedDate}</td>
+                  <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="p-3 font-medium text-gray-900">{item.id}</td>
+                    <td className="p-3 text-gray-900">{item.requestId}</td>
+                    <td className="p-3 text-gray-900">{item.department}</td>
+                    <td className="p-3 text-gray-900">{item.items}</td>
+                    <td className="p-3 text-gray-900">{item.quantity}</td>
+                    <td className="p-3 text-gray-900">{item.issuedTime}</td>
+                    <td className="p-3 text-gray-900">{item.issuedDate}</td>
                     <td className="p-3">
                       <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
                         {item.status}
@@ -216,43 +224,43 @@ const IssueItem = () => {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
+        <Card className="bg-white shadow-sm border-0">
+          <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-blue-600">
               <CheckCircle className="w-5 h-5" />
               Available
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{availableItems.length}</div>
+          <CardContent className="p-6">
+            <div className="text-3xl font-bold text-gray-900">{availableItems.length}</div>
             <p className="text-sm text-gray-600">Ready for issue</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className="bg-white shadow-sm border-0">
+          <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-green-600">
               <Send className="w-5 h-5" />
               Issued Today
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
+          <CardContent className="p-6">
+            <div className="text-3xl font-bold text-gray-900">
               {issuedItems.filter(item => item.issuedDate === new Date().toISOString().split('T')[0]).length}
             </div>
             <p className="text-sm text-gray-600">Items issued</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className="bg-white shadow-sm border-0">
+          <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-purple-600">
               <Clock className="w-5 h-5" />
               Total Issued
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{issuedItems.length}</div>
+          <CardContent className="p-6">
+            <div className="text-3xl font-bold text-gray-900">{issuedItems.length}</div>
             <p className="text-sm text-gray-600">All time</p>
           </CardContent>
         </Card>

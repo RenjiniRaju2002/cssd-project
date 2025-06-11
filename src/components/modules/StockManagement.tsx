@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,16 +9,23 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const StockManagement = () => {
-  const [stockItems, setStockItems] = useState([
-    { id: "STK001", name: "Surgery Kit", category: "Reusable", quantity: 25, location: "Storage A", minLevel: 10, status: "In Stock" },
-    { id: "STK002", name: "Forceps", category: "Reusable", quantity: 15, location: "Storage B", minLevel: 5, status: "Low Stock" },
-    { id: "STK003", name: "Gauze", category: "Non-Reusable", quantity: 100, location: "Storage C", minLevel: 20, status: "In Stock" }
-  ]);
+  const [stockItems, setStockItems] = useState(() => {
+    const savedItems = localStorage.getItem('stockItems');
+    return savedItems ? JSON.parse(savedItems) : [
+      { id: "STK001", name: "Surgery Kit", category: "Reusable", quantity: 25, location: "Storage A", minLevel: 10, status: "In Stock" },
+      { id: "STK002", name: "Forceps", category: "Reusable", quantity: 15, location: "Storage B", minLevel: 5, status: "Low Stock" },
+      { id: "STK003", name: "Gauze", category: "Non-Reusable", quantity: 100, location: "Storage C", minLevel: 20, status: "In Stock" }
+    ];
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [editingItem, setEditingItem] = useState(null);
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    localStorage.setItem('stockItems', JSON.stringify(stockItems));
+  }, [stockItems]);
 
   const handleAddItem = (event: React.FormEvent) => {
     event.preventDefault();
@@ -64,7 +71,8 @@ const StockManagement = () => {
   };
 
   const handleDeleteItem = (itemId: string) => {
-    setStockItems(stockItems.filter(item => item.id !== itemId));
+    const updatedItems = stockItems.filter(item => item.id !== itemId);
+    setStockItems(updatedItems);
     toast({
       title: "Item Deleted",
       description: "Item has been removed from inventory.",
@@ -74,6 +82,10 @@ const StockManagement = () => {
   const openEditDialog = (item: any) => {
     setEditingItem(item);
     setShowEditItem(true);
+  };
+
+  const viewItemDetails = (item: any) => {
+    console.log(item);
   };
 
   const filteredItems = stockItems.filter(item =>
@@ -191,18 +203,19 @@ const StockManagement = () => {
                     <td className="p-4">
                       <div className="flex gap-2">
                         <Button 
-                          variant="ghost" 
+                          variant="outline" 
                           size="sm"
                           onClick={() => openEditDialog(item)}
-                          className="text-[#00A8E8] hover:bg-blue-50"
+                          className="text-black hover:bg-gray-100 hover:text-black focus:text-black active:text-black"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
                         </Button>
                         <Button 
                           variant="ghost" 
-                          size="sm"
+                          size="sm" 
                           onClick={() => handleDeleteItem(item.id)}
-                          className="text-red-600 hover:bg-red-50"
+                          className="text-black hover:bg-gray-100 hover:text-black focus:text-black active:text-black"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
