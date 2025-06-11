@@ -43,27 +43,7 @@ const Dashboard = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <Card key={stat.title}># Stage all files
-          git add .
-          
-          # Create initial commit
-          git commit -m "Initial commit: sterile-flow-central-cssd-main project"
-          
-          # Create and switch to main branch
-          git branch -M main
-          
-          # Push to remote repository
-          git push -u origin main# Stage all files
-          git add .
-          
-          # Create initial commit
-          git commit -m "Initial commit: sterile-flow-central-cssd-main project"
-          
-          # Create and switch to main branch
-          git branch -M main
-          
-          # Push to remote repository
-          git push -u origin main
+          <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
               <stat.icon className={`h-4 w-4 ${stat.color}`} />
