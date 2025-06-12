@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Plus, Package, Edit, Trash2, Eye } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const StockManagement = () => {
@@ -21,11 +20,57 @@ const StockManagement = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
-    localStorage.setItem('stockItems', JSON.stringify(stockItems));
-  }, [stockItems]);
+    const loadStockItems = () => {
+      try {
+        // Load stock items
+        const stock = localStorage.getItem('stockItems');
+        const parsedStock = stock ? JSON.parse(stock) : [];
+
+        // Load sterilization processes
+        const processes = localStorage.getItem('sterilizationProcesses');
+        const parsedProcesses = processes ? JSON.parse(processes) : [];
+        const inProgressItems = parsedProcesses.filter(p => p.status === "In Progress").map(p => p.itemId);
+
+        // Update stock items with sterilization status
+        const updatedStock = parsedStock.map(item => ({
+          ...item,
+          status: inProgressItems.includes(item.id) ? "In Sterilization" : item.status
+        }));
+
+        setStockItems(updatedStock);
+      } catch (error) {
+        console.error('Error loading stock items:', error);
+      }
+    };
+
+    // Load initial data
+    loadStockItems();
+
+    // Listen for localStorage changes
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'stockItems' || event.key === 'sterilizationProcesses') {
+        loadStockItems();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "In Stock":
+        return "bg-green-100 text-green-800";
+      case "Low Stock":
+        return "bg-red-100 text-red-800";
+      case "In Sterilization":
+        return "bg-blue-100 text-blue-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   const handleAddItem = (event: React.FormEvent) => {
     event.preventDefault();
@@ -40,11 +85,10 @@ const StockManagement = () => {
       status: parseInt(formData.get('quantity') as string) > parseInt(formData.get('minLevel') as string) ? "In Stock" : "Low Stock"
     };
     
-    setStockItems([...stockItems, newItem]);
-    toast({
-      title: "Item Added",
-      description: `${newItem.name} has been added to inventory.`,
-    });
+    const updatedItems = [...stockItems, newItem];
+    setStockItems(updatedItems);
+    localStorage.setItem('stockItems', JSON.stringify(updatedItems));
+    
     setShowAddItem(false);
   };
 
@@ -61,11 +105,10 @@ const StockManagement = () => {
       status: parseInt(formData.get('quantity') as string) > parseInt(formData.get('minLevel') as string) ? "In Stock" : "Low Stock"
     };
     
-    setStockItems(stockItems.map(item => item.id === editingItem.id ? updatedItem : item));
-    toast({
-      title: "Item Updated",
-      description: `${updatedItem.name} has been updated successfully.`,
-    });
+    const updatedItems = stockItems.map(item => item.id === editingItem.id ? updatedItem : item);
+    setStockItems(updatedItems);
+    localStorage.setItem('stockItems', JSON.stringify(updatedItems));
+    
     setShowEditItem(false);
     setEditingItem(null);
   };
@@ -73,10 +116,7 @@ const StockManagement = () => {
   const handleDeleteItem = (itemId: string) => {
     const updatedItems = stockItems.filter(item => item.id !== itemId);
     setStockItems(updatedItems);
-    toast({
-      title: "Item Deleted",
-      description: "Item has been removed from inventory.",
-    });
+    localStorage.setItem('stockItems', JSON.stringify(updatedItems));
   };
 
   const openEditDialog = (item: any) => {
@@ -193,10 +233,7 @@ const StockManagement = () => {
                     <td className="p-4 text-gray-900">{item.quantity}</td>
                     <td className="p-4 text-gray-600">{item.location}</td>
                     <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        item.status === 'In Stock' ? 'bg-green-100 text-green-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
                         {item.status}
                       </span>
                     </td>

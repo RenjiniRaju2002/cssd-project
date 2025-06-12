@@ -93,6 +93,39 @@ const SterilizationProcess = () => {
           : process
       );
       localStorage.setItem('sterilizationProcesses', JSON.stringify(updated));
+
+      // Update stock levels when process is completed
+      const completedProcess = updated.find(p => p.id === id);
+      if (completedProcess) {
+        const stock = localStorage.getItem('stockItems');
+        const parsedStock = stock ? JSON.parse(stock) : [];
+        
+        // Find if item exists in stock
+        const existingItem = parsedStock.find(item => item.id === completedProcess.itemId);
+        
+        if (existingItem) {
+          // Update existing item quantity
+          const updatedStock = parsedStock.map(item =>
+            item.id === completedProcess.itemId
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+          localStorage.setItem('stockItems', JSON.stringify(updatedStock));
+        } else {
+          // Add new item to stock
+          const newItem = {
+            id: completedProcess.itemId,
+            name: completedProcess.itemId, // You might want to map this to a proper name
+            category: "Sterilized",
+            quantity: 1,
+            location: "Sterilization Area",
+            minLevel: 1,
+            status: "In Stock"
+          };
+          localStorage.setItem('stockItems', JSON.stringify([...parsedStock, newItem]));
+        }
+      }
+
       return updated;
     });
     toast({

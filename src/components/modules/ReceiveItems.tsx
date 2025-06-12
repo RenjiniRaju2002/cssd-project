@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Search, Eye, CheckCircle, Clock, XCircle, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { Search, Eye, CheckCircle, Clock, XCircle, Plus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const ReceiveItems = () => {
   const navigate = useNavigate();
@@ -168,9 +168,23 @@ const ReceiveItems = () => {
     }
   };
 
+  const goToStockManagement = () => {
+    navigate('/stock-management');
+  };
+
   return (
-    <div className="space-y-4 sm:space-y-6 bg-gray-50 min-h-screen p-4 sm:p-6">
-      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+    <div className="space-y-6 bg-gray-50 min-h-screen p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Receive Items</h1>
+        <Button
+          variant="outline"
+          onClick={() => navigate('/stock-management')}
+        >
+          View Stock Management
+        </Button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Receive Items</h1>
@@ -225,7 +239,7 @@ const ReceiveItems = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input 
                 placeholder="Search by ID, Request ID, or Department..." 
-                className="pl-10 border-gray-300 hover:border-gray-400 focus:border-[#00A8E8] focus:ring-[#00A8E8]"
+                className="pl-10 border-none focus:ring-0 focus:shadow-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

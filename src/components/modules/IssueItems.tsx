@@ -13,32 +13,82 @@ const IssueItems = () => {
   const [selectedItem, setSelectedItem] = useState("");
   const [selectedQuantity, setSelectedQuantity] = useState("");
 
-  // Load available items from completed sterilization processes
+  // Load available items on component mount
   useEffect(() => {
-    const loadAvailableItems = () => {
-      try {
-        // Get completed processes from localStorage
-        const processes = localStorage.getItem('sterilizationProcesses');
-        if (!processes) return;
+    loadAvailableItems();
+  }, []);
 
-        const parsedProcesses = JSON.parse(processes);
-        const completedProcesses = parsedProcesses.filter(p => p.status === "Completed");
-
-        // Extract unique items from completed processes
-        const availableItems = Array.from(new Set(completedProcesses.map(p => p.itemId)));
-        setItems(availableItems);
-      } catch (error) {
-        console.error('Error loading available items:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load available items",
-          variant: "destructive"
-        });
+  // Set up storage event listener for automatic updates
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'stockItems' || e.key === 'sterilizationProcesses' || e.key === 'issuedItems') {
+        loadAvailableItems();
       }
     };
 
-    loadAvailableItems();
-  }, [toast]);
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Set up polling for updates every 30 seconds
+  useEffect(() => {
+    const pollInterval = setInterval(loadAvailableItems, 30000);
+    return () => clearInterval(pollInterval);
+  }, []);
+
+  const loadAvailableItems = () => {
+    try {
+      // Get stock items from localStorage
+      const stock = localStorage.getItem('stockItems');
+      const parsedStock = stock ? JSON.parse(stock) : [];
+      
+      // Get completed processes from localStorage
+      const processes = localStorage.getItem('sterilizationProcesses');
+      const parsedProcesses = processes ? JSON.parse(processes) : [];
+      const completedProcesses = parsedProcesses.filter(p => p.status === "Completed");
+
+      // Get issued items to prevent re-issuing
+      const issuedItems = localStorage.getItem('issuedItems');
+      const parsedIssuedItems = issuedItems ? JSON.parse(issuedItems) : [];
+
+      // Combine stock items with sterilized items, ensuring we don't double-count
+      const availableItems = parsedStock
+        .filter(item => item.status === "In Stock")
+        .map(stockItem => {
+          // Find matching completed processes
+          const matchingProcesses = completedProcesses.filter(p => p.itemId === stockItem.id);
+          
+          // Calculate total available quantity
+          const totalQuantity = stockItem.quantity + matchingProcesses.length;
+          
+          return {
+            ...stockItem,
+            quantity: totalQuantity,
+            available: totalQuantity > 0,
+            lastSterilized: matchingProcesses.length > 0 
+              ? new Date(matchingProcesses[0].endTime).toLocaleString()
+              : "Not sterilized yet"
+          };
+        })
+        .filter(item => item.available); // Only show items that are actually available
+
+      // Remove items that have been fully issued
+      const filteredItems = availableItems.filter(item => {
+        const issuedForThisItem = parsedIssuedItems.filter(i => i.itemId === item.id);
+        const totalIssued = issuedForThisItem.reduce((sum, i) => sum + i.quantity, 0);
+        return item.quantity > totalIssued;
+      });
+
+      setItems(filteredItems);
+    } catch (error) {
+      console.error('Error loading available items:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load available items",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleIssueItem = () => {
     if (!selectedItem || !selectedQuantity) {
@@ -51,29 +101,59 @@ const IssueItems = () => {
     }
 
     try {
-      // Get current stock from localStorage
-      const stock = localStorage.getItem('cssdStock');
-      const parsedStock = stock ? JSON.parse(stock) : {};
+      const selectedItemData = items.find(item => item.id === selectedItem);
+      if (!selectedItemData) {
+        throw new Error("Selected item not found");
+      }
 
-      // Update stock quantity
-      const updatedStock = {
-        ...parsedStock,
-        [selectedItem]: {
-          ...(parsedStock[selectedItem] || {}),
-          quantity: (parsedStock[selectedItem]?.quantity || 0) - parseInt(selectedQuantity)
-        }
+      const requestedQuantity = parseInt(selectedQuantity);
+      if (requestedQuantity > selectedItemData.quantity) {
+        toast({
+          title: "Error",
+          description: `Only ${selectedItemData.quantity} items available`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Get existing issued items
+      const issuedItems = localStorage.getItem('issuedItems');
+      const parsedIssuedItems = issuedItems ? JSON.parse(issuedItems) : [];
+
+      // Create new issued item
+      const newIssuedItem = {
+        id: `ISS${String(parsedIssuedItems.length + 1).padStart(3, '0')}`,
+        itemId: selectedItem,
+        name: selectedItemData.name,
+        quantity: requestedQuantity,
+        issuedTime: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+        issuedDate: new Date().toISOString().split('T')[0],
+        status: "Issued"
       };
 
-      // Save updated stock
-      localStorage.setItem('cssdStock', JSON.stringify(updatedStock));
+      // Update stock levels
+      const stock = localStorage.getItem('stockItems');
+      const parsedStock = stock ? JSON.parse(stock) : [];
+      const updatedStock = parsedStock.map(item => 
+        item.id === selectedItem 
+          ? { ...item, quantity: item.quantity - requestedQuantity }
+          : item
+      );
+      
+      // Update localStorage
+      localStorage.setItem('issuedItems', JSON.stringify([...parsedIssuedItems, newIssuedItem]));
+      localStorage.setItem('stockItems', JSON.stringify(updatedStock));
 
       // Reset form
       setSelectedItem("");
       setSelectedQuantity("");
 
+      // Reload available items
+      loadAvailableItems();
+
       toast({
         title: "Success",
-        description: `Item ${selectedItem} issued successfully`,
+        description: `${requestedQuantity} ${selectedItemData.name} issued successfully`,
       });
     } catch (error) {
       console.error('Error issuing item:', error);
@@ -108,8 +188,8 @@ const IssueItems = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-white border-0">
                   {items.map((item) => (
-                    <SelectItem key={item} value={item}>
-                      {item}
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.name} ({item.quantity} available)
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -128,10 +208,10 @@ const IssueItems = () => {
               />
             </div>
 
-            <Button
+            <Button 
               type="button"
               onClick={handleIssueItem}
-              className="bg-[#00A8E8] hover:bg-[#0088cc] text-white"
+              className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white"
             >
               Issue Item
             </Button>
@@ -151,12 +231,12 @@ const IssueItems = () => {
               <p className="text-gray-500 text-sm">No available items found</p>
             ) : (
               items.map((item) => (
-                <div key={item} className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+                <div key={item.id} className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
                   <div>
-                    <h3 className="font-medium text-gray-900 text-sm">{item}</h3>
+                    <h3 className="font-medium text-gray-900 text-sm">{item.name} ({item.quantity} available)</h3>
                   </div>
                   <Badge className="bg-green-100 text-green-800 text-xs px-2 py-1">
-                    Available
+                    {item.category}
                   </Badge>
                 </div>
               ))

@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 245 245 247;
+    --background: None;
     --foreground: 17 24 39;
 
     --card: 255 255 255;
@@ -30,9 +30,9 @@
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
 
-    --border: transparent; /* Changed from yellow to transparent */
-    --card-border: transparent; /* Changed from yellow to transparent */
-    --dropdown-border: transparent; /* Changed from yellow to transparent */
+    --border: None; /* Changed from yellow to transparent */
+    --card-border: None; /* Changed from yellow to transparent */
+    --dropdown-border: None; /* Changed from yellow to transparent */
     --input: 255 255 255;
     --ring: 0 168 232; /* Changed to #00A8E8 */
 

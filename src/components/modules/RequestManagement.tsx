@@ -46,9 +46,21 @@ const RequestManagement = () => {
   const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [showStatusChange, setShowStatusChange] = useState(false);
   const [packageKits, setPackageKits] = useState([
-    { id: "KIT001", name: "Basic Surgery Kit", items: ["Forceps", "Scissors", "Clamps"], department: "OR-1" },
-    { id: "KIT002", name: "Cardiac Kit", items: ["Cardiac Forceps", "Retractors", "Sutures"], department: "OR-2" }
+    { id: "KIT001", requestId: "REQ001", name: "Basic Surgery Kit", items: ["Forceps", "Scissors", "Clamps"], department: "OR-1", creationDate: "2024-06-10" },
+    { id: "KIT002", requestId: "REQ002", name: "Cardiac Kit", items: ["Cardiac Forceps", "Retractors", "Sutures"], department: "OR-2", creationDate: "2024-06-10" }
   ]);
+
+  // Cleanup effect when component unmounts
+  useEffect(() => {
+    return () => {
+      // Reset component state but keep localStorage data
+      setPackageKits([]);
+      setShowCreateKit(false);
+      setSelectedRequest(null);
+      setShowRequestDetails(false);
+      setShowStatusChange(false);
+    };
+  }, []);
 
   // Delete request functionality
   const handleDeleteRequest = (requestId: string) => {
@@ -64,6 +76,19 @@ const RequestManagement = () => {
       const updatedWorkflow = prevWorkflow.filter(item => item.requestId !== requestId);
       localStorage.setItem('cssdWorkflowItems', JSON.stringify(updatedWorkflow));
       return updatedWorkflow;
+    });
+
+    // Remove related package kit if it exists
+    const relatedKit = packageKits.find(kit => kit.requestId === requestId);
+    if (relatedKit) {
+      const updatedKits = packageKits.filter(kit => kit.requestId !== requestId);
+      setPackageKits(updatedKits);
+      localStorage.setItem('cssdPackageKits', JSON.stringify(updatedKits));
+    }
+
+    toast({
+      title: "Request Deleted",
+      description: `Request ${requestId} has been deleted successfully.`,
     });
   };
 
@@ -142,35 +167,35 @@ const RequestManagement = () => {
     const newKitId = `KIT${String(packageKits.length + 1).padStart(3, '0')}`;
     const newKit = {
       id: newKitId,
+      requestId: generateRequestId(),
       name: formData.get('kitName') as string,
       items: (formData.get('kitItems') as string).split(',').map(item => item.trim()),
       department: formData.get('kitDepartment') as string,
       priority: formData.get('priority') as string,
       status: formData.get('status') as string,
       quantity: parseInt(formData.get('quantity') as string),
-      date: formData.get('date') as string
+      creationDate: new Date().toISOString().split('T')[0]
     };
-    
+
     // Create request for the new kit
-    const newRequestId = `REQ${String(requests.length + 1).padStart(3, '0')}`;
     const newRequest = {
-      id: newRequestId,
-      department: formData.get('kitDepartment') as string,
+      id: newKit.requestId,
+      department: newKit.department,
       items: newKit.name,
       quantity: newKit.quantity,
       priority: newKit.priority,
-      status: newKit.status,
-      date: newKit.date,
+      status: "Requested",
+      date: newKit.creationDate,
       time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
     };
 
     // Add to workflow tracking
     const workflowItem = {
-      id: newRequestId,
-      requestId: newRequestId,
+      id: newKit.requestId,
+      requestId: newKit.requestId,
       kitId: newKitId,
       sterilizationId: "",
-      currentStatus: newKit.status,
+      currentStatus: "Requested",
       timestamp: new Date().toISOString(),
       location: "Request Queue"
     };
@@ -187,7 +212,7 @@ const RequestManagement = () => {
     
     toast({
       title: "Package Kit Created",
-      description: `Kit ${newKitId} and Request ${newRequestId} have been created successfully.`,
+      description: `Kit ${newKitId} and Request ${newKit.requestId} have been created successfully.`,
     });
     
     // Close the dialog
@@ -198,15 +223,32 @@ const RequestManagement = () => {
   };
 
   const handleDeleteKit = (kitId: string) => {
+    // Find the kit to get its requestId
+    const kitToDelete = packageKits.find(kit => kit.id === kitId);
+    if (!kitToDelete) return;
+
+    // Remove the kit from package kits
     const updatedKits = packageKits.filter(kit => kit.id !== kitId);
     setPackageKits(updatedKits);
-    
-    // Save to localStorage immediately
+
+    // Remove the associated request
+    const updatedRequests = requests.filter(request => request.id !== kitToDelete.requestId);
+    setRequests(updatedRequests);
+
+    // Remove the associated workflow items
+    const updatedWorkflowItems = workflowItems.filter(item => 
+      item.kitId !== kitId && item.requestId !== kitToDelete.requestId
+    );
+    setWorkflowItems(updatedWorkflowItems);
+
+    // Save all changes to localStorage
     localStorage.setItem('cssdPackageKits', JSON.stringify(updatedKits));
-    
+    localStorage.setItem('cssdRequests', JSON.stringify(updatedRequests));
+    localStorage.setItem('cssdWorkflowItems', JSON.stringify(updatedWorkflowItems));
+
     toast({
-      title: "Kit Deleted",
-      description: `Kit has been deleted successfully.`,
+      title: "Kit and Request Deleted",
+      description: `Kit ${kitId} and its associated request have been deleted successfully.`,
     });
   };
 
@@ -246,12 +288,47 @@ const RequestManagement = () => {
 
     // Close status change dialog
     setShowStatusChange(false);
+    setSelectedRequest(null);
 
-    toast({
-      title: "Status Updated",
-      description: `Request ${requestId} status has been updated to ${newStatus}.`,
-    });
+    // Force a re-render to update the UI
+    setRequests(prev => [...prev]);
   };
+
+  // Add useEffect to listen for localStorage changes
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'cssdRequests' || e.key === 'cssdWorkflowItems') {
+        loadRequests();
+        loadWorkflowItems();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Add loading functions
+  const loadRequests = () => {
+    const savedRequests = localStorage.getItem('cssdRequests');
+    if (savedRequests) {
+      const parsedRequests = JSON.parse(savedRequests);
+      setRequests(parsedRequests);
+    }
+  };
+
+  const loadWorkflowItems = () => {
+    const savedWorkflow = localStorage.getItem('cssdWorkflowItems');
+    if (savedWorkflow) {
+      const parsedWorkflow = JSON.parse(savedWorkflow);
+      setWorkflowItems(parsedWorkflow);
+    }
+  };
+
+  // Load initial data
+  useEffect(() => {
+    loadRequests();
+    loadWorkflowItems();
+  }, []);
 
   // Filter package kits based on search term
   const filteredKits = packageKits.filter(kit => 
@@ -422,28 +499,6 @@ const RequestManagement = () => {
                       <Label htmlFor="quantity" className="text-gray-700">Quantity</Label>
                       <Input name="quantity" type="number" placeholder="Enter quantity" required className="border-gray-300" />
                     </div>
-                    <div>
-                      <Label htmlFor="date" className="text-gray-700">Required By Date</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant={"outline"}
-                            className={"w-full justify-start text-left font-normal border-gray-300 hover:bg-gray-50"}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={selectedDate}
-                            onSelect={setSelectedDate}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
                     <Button type="submit" className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white">
                       Create Package Kit
                     </Button>
@@ -480,6 +535,7 @@ const RequestManagement = () => {
                             </span>
                           ))}
                         </div>
+                        <p className="text-sm text-gray-600">Created on: {kit.creationDate}</p>
                       </div>
                       <div className="flex gap-2">
                         <Button 
@@ -607,7 +663,7 @@ const RequestManagement = () => {
                         variant="ghost" 
                         size="sm"
                         onClick={() => handleDeleteRequest(request.id)}
-                        className="text-red-600 hover:bg-red-50 hover:text-red-900"
+                        className="text-black hover:bg-gray-100"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

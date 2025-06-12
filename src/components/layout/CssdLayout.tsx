@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { CssdNavbar } from "./CssdNavbar";
@@ -16,7 +15,7 @@ const CssdLayout = () => {
       <AppSidebar />
       <main className="flex-1 flex flex-col">
         <CssdNavbar />
-        <div className="flex-1 p-6 bg-gray-50">
+        <div className="flex-1 bg-background">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/request-management" element={<RequestManagement />} />

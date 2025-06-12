@@ -2,26 +2,51 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Download, BarChart3, TrendingUp, TrendingDown } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { CalendarIcon, Download, BarChart3, TrendingUp, TrendingDown, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+
+interface ConsumptionRecord {
+  id: string;
+  surgery: string;
+  department: string;
+  date: string;
+  beforeCount: number;
+  afterCount: number;
+  consumed: number;
+  items: string;
+}
 
 const ConsumptionReports = () => {
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [reportGenerated, setReportGenerated] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const consumptionData = [
+  const [consumptionData, setConsumptionData] = useState<ConsumptionRecord[]>([
     { id: "SURG001", surgery: "Cardiac Surgery", department: "OR-1", date: "2024-06-10", beforeCount: 25, afterCount: 18, consumed: 7, items: "Surgery Kit, Forceps, Clamps" },
     { id: "SURG002", surgery: "Knee Replacement", department: "OR-2", date: "2024-06-10", beforeCount: 15, afterCount: 12, consumed: 3, items: "Orthopedic Kit, Drills" },
     { id: "SURG003", surgery: "Appendectomy", department: "OR-1", date: "2024-06-09", beforeCount: 20, afterCount: 17, consumed: 3, items: "Basic Surgery Kit" }
-  ];
+  ]);
+
+  // Form state
+  const [formData, setFormData] = useState({
+    surgeryId: "",
+    surgery: "",
+    department: "",
+    date: "",
+    beforeCount: "",
+    afterCount: "",
+    items: ""
+  });
 
   const weeklyData = [
     { week: "Week 1", consumption: 45, sterilized: 52 },
@@ -37,6 +62,79 @@ const ConsumptionReports = () => {
     { department: "ICU", count: 12 },
     { department: "Emergency", count: 8 }
   ];
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmitForm = () => {
+    // Validate form
+    if (!formData.surgeryId || !formData.surgery || !formData.department || 
+        !formData.date || !formData.beforeCount || !formData.afterCount || !formData.items) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const beforeCount = parseInt(formData.beforeCount);
+    const afterCount = parseInt(formData.afterCount);
+    const consumed = beforeCount - afterCount;
+
+    if (beforeCount < 0 || afterCount < 0) {
+      toast({
+        title: "Invalid Count",
+        description: "Before and after counts must be positive numbers.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (afterCount > beforeCount) {
+      toast({
+        title: "Invalid Count",
+        description: "After count cannot be greater than before count.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newRecord: ConsumptionRecord = {
+      id: formData.surgeryId,
+      surgery: formData.surgery,
+      department: formData.department,
+      date: formData.date,
+      beforeCount: beforeCount,
+      afterCount: afterCount,
+      consumed: consumed,
+      items: formData.items
+    };
+
+    setConsumptionData(prev => [...prev, newRecord]);
+    
+    // Reset form
+    setFormData({
+      surgeryId: "",
+      surgery: "",
+      department: "",
+      date: "",
+      beforeCount: "",
+      afterCount: "",
+      items: ""
+    });
+
+    setIsDialogOpen(false);
+
+    toast({
+      title: "Record Added Successfully",
+      description: `Surgery consumption record for ${formData.surgery} has been added.`,
+    });
+  };
 
   const generateReport = () => {
     if (!dateFrom || !dateTo) {
@@ -132,12 +230,13 @@ const ConsumptionReports = () => {
   const averageConsumption = (totalConsumption / consumptionData.length).toFixed(1);
 
   return (
-    <div className="space-y-4 sm:space-y-6 bg-gray-50 min-h-screen p-4 sm:p-6">
+    <div className="space-y-4 sm:space-y-6 bg-background min-h-screen p-4 sm:p-6">
       <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Consumption Reports</h1>
         <p className="text-sm sm:text-base text-gray-600 mt-1">Generate and analyze item consumption reports</p>
       </div>
 
+      
       <Card className="bg-white shadow-sm">
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
           <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
@@ -234,6 +333,7 @@ const ConsumptionReports = () => {
         </CardContent>
       </Card>
 
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card className="bg-white shadow-sm">
           <CardHeader className="border-b border-gray-200 p-4">
@@ -314,7 +414,110 @@ const ConsumptionReports = () => {
 
       <Card className="bg-white shadow-sm">
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
-          <CardTitle className="text-lg text-gray-900">Surgery Item Consumption Details</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-lg text-gray-900">Surgery Item Consumption Details</CardTitle>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Consumption Record
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-white max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-gray-900">Add Surgery Consumption Record</DialogTitle>
+                </DialogHeader>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <Label className="text-gray-700 text-sm">Surgery ID</Label>
+                    <Input
+                      value={formData.surgeryId}
+                      onChange={(e) => handleInputChange("surgeryId", e.target.value)}
+                      placeholder="e.g., SURG004"
+                      className="mt-1 border-gray-300 "
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-gray-700 text-sm">Surgery Type</Label>
+                    <Input
+                      value={formData.surgery}
+                      onChange={(e) => handleInputChange("surgery", e.target.value)}
+                      placeholder="e.g., Hip Replacement"
+                      className="mt-1 border-gray-300 "
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-gray-700 text-sm">Department</Label>
+                    <Select value={formData.department} onValueChange={(value) => handleInputChange("department", value)}>
+                      <SelectTrigger className="border-gray-300  mt-1">
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent className="">
+                        <SelectItem value="OR-1">OR-1</SelectItem>
+                        <SelectItem value="OR-2">OR-2</SelectItem>
+                        <SelectItem value="OR-3">OR-3</SelectItem>
+                        <SelectItem value="ICU">ICU</SelectItem>
+                        <SelectItem value="Emergency">Emergency</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-gray-700 text-sm">Date</Label>
+                    <Input
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => handleInputChange("date", e.target.value)}
+                      className="mt-1 border-gray-300 "
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-gray-700 text-sm">Before Count</Label>
+                    <Input
+                      type="number"
+                      value={formData.beforeCount}
+                      onChange={(e) => handleInputChange("beforeCount", e.target.value)}
+                      placeholder="e.g., 30"
+                      className="mt-1 border-gray-300 f"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-gray-700 text-sm">After Count</Label>
+                    <Input
+                      type="number"
+                      value={formData.afterCount}
+                      onChange={(e) => handleInputChange("afterCount", e.target.value)}
+                      placeholder="e.g., 25"
+                      className="mt-1 border-gray-300 "
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label className="text-gray-700 text-sm">Items Used</Label>
+                    <Input
+                      value={formData.items}
+                      onChange={(e) => handleInputChange("items", e.target.value)}
+                      placeholder="e.g., Surgery Kit, Forceps, Clamps"
+                      className="mt-1 border-gray-300 "
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-4 mt-6">
+                  <Button 
+                    onClick={handleSubmitForm}
+                    className="bg-[#00A8E8] hover:bg-[#0088cc] text-white"
+                  >
+                    Add Record
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
