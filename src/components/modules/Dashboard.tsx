@@ -2,8 +2,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Activity, Package, Clock, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Header from "./Header";
+import Footer from "./Footer";
 
-const Dashboard = () => {
+const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     activeRequests: 0,
@@ -11,6 +13,12 @@ const Dashboard = () => {
     itemsReady: 0,
     lowStockItems: 0
   });
+
+  const [currentTime, setCurrentTime] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     // Load counts from localStorage
@@ -79,8 +87,12 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 bg-gray-50 min-h-screen p-4 sm:p-6">
-      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+    <>
+    <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+    <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
+  
+      
+      <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm p-4 sm:p-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-sm sm:text-base text-gray-600 mt-1">Central Sterile Service Department</p>
       </div>
@@ -179,10 +191,15 @@ const Dashboard = () => {
                 <p className="text-xs sm:text-sm font-medium text-gray-900">Start Sterilization</p>
               </button>
             </div>
+            
           </CardContent>
         </Card>
-      </div>
+        </div>
+        <Footer />
+
     </div>
+
+    </>
   );
 };
 export default Dashboard;

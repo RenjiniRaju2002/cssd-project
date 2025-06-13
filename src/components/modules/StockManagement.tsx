@@ -6,8 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Plus, Package, Edit, Trash2, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import Header from "./Header";
+import Footer from "./Footer";  
 
-const StockManagement = () => {
+
+const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
   const [stockItems, setStockItems] = useState(() => {
     const savedItems = localStorage.getItem('stockItems');
     return savedItems ? JSON.parse(savedItems) : [
@@ -138,10 +141,14 @@ const StockManagement = () => {
   const totalItems = stockItems.length;
 
   return (
-    <div className="space-y-6 bg-gray-50 min-h-screen p-6">
+    <>
+    <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+    <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
+       <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h1 className="text-3xl font-bold text-gray-900">Stock Management</h1>
         <p className="text-gray-600">Manage inventory items and stock levels</p>
+      </div>
       </div>
 
       <Card className="bg-white shadow-sm">
@@ -377,6 +384,8 @@ const StockManagement = () => {
         </Card>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

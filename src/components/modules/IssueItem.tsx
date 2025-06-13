@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Send, Clock, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Header from "./Header";
+import Footer from "./Footer";  
 
-const IssueItem = () => {
+const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
   const [issuedItems, setIssuedItems] = useState(() => {
     const savedItems = localStorage.getItem('issuedItems');
     return savedItems ? JSON.parse(savedItems) : [
@@ -17,6 +19,11 @@ const IssueItem = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const [currentTime, setCurrentTime] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('issuedItems', JSON.stringify(issuedItems));
@@ -63,8 +70,12 @@ const IssueItem = () => {
   );
 
   return (
-    <div className="space-y-6 bg-gray-50 min-h-screen p-6">
-      <div className="bg-white rounded-lg shadow-sm p-6 border-0">
+    <>
+    <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+    <div className="space-y-6 bg-[#d9e0e7] min-h-screen p-6">
+      
+
+      <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm p-6">
         <h1 className="text-3xl font-bold text-gray-900">Issue Item</h1>
         <p className="text-gray-600">Issue sterilized items to departments and outlets</p>
       </div>
@@ -266,6 +277,8 @@ const IssueItem = () => {
         </Card>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

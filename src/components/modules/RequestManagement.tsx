@@ -12,8 +12,11 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useLocation } from "react-router-dom";
+import Header from "./Header";
+import Footer from "./Footer";
 
-const RequestManagement = () => {
+
+const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
   const [requests, setRequests] = useState([
     { id: "REQ001", department: "OR-1", priority: "High", items: "Surgery Kit", quantity: 2, status: "Pending", date: "2024-06-10" },
     { id: "REQ002", department: "OR-2", priority: "Medium", items: "Instruments", quantity: 5, status: "Processing", date: "2024-06-10" },
@@ -353,12 +356,15 @@ const RequestManagement = () => {
   });
 
   return (
-    <div className="space-y-6 bg-gray-50 min-h-screen p-6">
+    <>
+    <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+    <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
+       <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h1 className="text-3xl font-bold text-gray-900">Request Management</h1>
         <p className="text-gray-600">Create and manage sterilization requests</p>
       </div>
-
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-white shadow-sm">
           <CardHeader className="border-b border-gray-200">
@@ -779,7 +785,10 @@ const RequestManagement = () => {
           )}
         </DialogContent>
       </Dialog>
+      <Footer />
     </div>
+    
+    </>
   );
 };
 

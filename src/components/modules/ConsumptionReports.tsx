@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -7,10 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CalendarIcon, Download, BarChart3, TrendingUp, TrendingDown, Plus } from "lucide-react";
+import Header from "./Header";
+import Footer from "./Footer";  
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { CalendarIcon, Download, BarChart3, TrendingUp, TrendingDown, Plus, Clock as ClockIcon, Calculator as CalculatorIcon } from "lucide-react";
 
 interface ConsumptionRecord {
   id: string;
@@ -23,7 +25,7 @@ interface ConsumptionRecord {
   items: string;
 }
 
-const ConsumptionReports = () => {
+const ConsumptionReports = ({ sidebarCollapsed, toggleSidebar }) => {
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
   const [selectedDepartment, setSelectedDepartment] = useState("all");
@@ -31,11 +33,19 @@ const ConsumptionReports = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const [consumptionData, setConsumptionData] = useState<ConsumptionRecord[]>([
-    { id: "SURG001", surgery: "Cardiac Surgery", department: "OR-1", date: "2024-06-10", beforeCount: 25, afterCount: 18, consumed: 7, items: "Surgery Kit, Forceps, Clamps" },
-    { id: "SURG002", surgery: "Knee Replacement", department: "OR-2", date: "2024-06-10", beforeCount: 15, afterCount: 12, consumed: 3, items: "Orthopedic Kit, Drills" },
-    { id: "SURG003", surgery: "Appendectomy", department: "OR-1", date: "2024-06-09", beforeCount: 20, afterCount: 17, consumed: 3, items: "Basic Surgery Kit" }
-  ]);
+  const [consumptionData, setConsumptionData] = useState<ConsumptionRecord[]>(() => {
+    const saved = localStorage.getItem('consumptionData');
+    return saved ? JSON.parse(saved) : [
+      { id: "SURG001", surgery: "Cardiac Surgery", department: "OR-1", date: "2024-06-10", beforeCount: 25, afterCount: 18, consumed: 7, items: "Surgery Kit, Forceps, Clamps" },
+      { id: "SURG002", surgery: "Knee Replacement", department: "OR-2", date: "2024-06-10", beforeCount: 15, afterCount: 12, consumed: 3, items: "Orthopedic Kit, Drills" },
+      { id: "SURG003", surgery: "Appendectomy", department: "OR-1", date: "2024-06-09", beforeCount: 20, afterCount: 17, consumed: 3, items: "Basic Surgery Kit" }
+    ];
+  });
+
+  // Persist consumption data to localStorage
+  useEffect(() => {
+    localStorage.setItem('consumptionData', JSON.stringify(consumptionData));
+  }, [consumptionData]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -48,20 +58,69 @@ const ConsumptionReports = () => {
     items: ""
   });
 
-  const weeklyData = [
-    { week: "Week 1", consumption: 45, sterilized: 52 },
-    { week: "Week 2", consumption: 38, sterilized: 41 },
-    { week: "Week 3", consumption: 42, sterilized: 48 },
-    { week: "Week 4", consumption: 51, sterilized: 55 }
-  ];
+  // Get filtered data based on selected filters
+  const getFilteredData = () => {
+    return consumptionData.filter(item => {
+      const date = new Date(item.date);
+      return (!dateFrom || date >= dateFrom) && 
+             (!dateTo || date <= dateTo) && 
+             (selectedDepartment === "all" || item.department === selectedDepartment);
+    });
+  };
 
-  const departmentData = [
-    { department: "OR-1", count: 28 },
-    { department: "OR-2", count: 22 },
-    { department: "OR-3", count: 15 },
-    { department: "ICU", count: 12 },
-    { department: "Emergency", count: 8 }
-  ];
+  // Calculate statistics from consumption data
+  const calculateStatistics = () => {
+    const filteredData = getFilteredData();
+
+    // Calculate weekly consumption
+    const weeklyData = [];
+    const startDate = dateFrom || new Date(consumptionData[0]?.date || new Date());
+    const endDate = dateTo || new Date();
+    
+    // Calculate weeks
+    const weeks = Math.ceil((endDate.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+    for (let i = 0; i < weeks; i++) {
+      const weekStart = new Date(startDate.getTime() + (i * 7 * 24 * 60 * 60 * 1000));
+      const weekEnd = new Date(weekStart.getTime() + (6 * 24 * 60 * 60 * 1000));
+      
+      const weekConsumption = filteredData.filter(item => {
+        const itemDate = new Date(item.date);
+        return itemDate >= weekStart && itemDate <= weekEnd;
+      }).reduce((sum, item) => sum + item.consumed, 0);
+
+      weeklyData.push({
+        week: `Week ${i + 1} (${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d')})`,
+        consumption: weekConsumption,
+        sterilized: weekConsumption // Assuming sterilized items are equal to consumed
+      });
+    }
+
+    // Calculate department-wise consumption
+    const departmentData = Array.from(
+      new Set(filteredData.map(item => item.department))
+    ).map(dept => ({
+      department: dept,
+      count: filteredData.filter(item => item.department === dept).length,
+      totalConsumption: filteredData.filter(item => item.department === dept)
+        .reduce((sum, item) => sum + item.consumed, 0)
+    }));
+
+    // Calculate total statistics
+    const totalConsumption = filteredData.reduce((sum, item) => sum + item.consumed, 0);
+    const totalSurgery = filteredData.length;
+    const averagePerSurgery = totalSurgery > 0 ? totalConsumption / totalSurgery : 0;
+
+    return {
+      weeklyData,
+      departmentData,
+      totalConsumption,
+      totalSurgery,
+      averagePerSurgery,
+      filteredData
+    };
+  };
+
+  const stats = calculateStatistics();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -169,28 +228,59 @@ const ConsumptionReports = () => {
       return;
     }
     
+    const filteredData = getFilteredData();
     const reportData = {
       dateFrom: dateFrom ? format(dateFrom, "dd/MM/yyyy") : "N/A",
       dateTo: dateTo ? format(dateTo, "dd/MM/yyyy") : "N/A",
-      department: selectedDepartment,
-      totalConsumption: consumptionData.reduce((sum, item) => sum + item.consumed, 0),
-      data: consumptionData
+      department: selectedDepartment === "all" ? "All Departments" : selectedDepartment,
+      totalConsumption: stats.totalConsumption,
+      totalSurgeries: stats.totalSurgery,
+      averagePerSurgery: stats.averagePerSurgery.toFixed(1),
+      data: filteredData
     };
     
-    console.log("Exporting to PDF with data:", reportData);
+    console.log("Exporting to PDF with filtered data:", reportData);
+    
+    // Create formatted report content
+    const reportContent = `
+HODO Hospital - Central Sterile Service Department
+Consumption Report
+
+Report Period: ${reportData.dateFrom} to ${reportData.dateTo}
+Department: ${reportData.department}
+Generated on: ${format(new Date(), 'dd/MM/yyyy HH:mm')}
+
+SUMMARY:
+Total Consumption: ${reportData.totalConsumption} items
+Total Surgeries: ${reportData.totalSurgeries}
+Average per Surgery: ${reportData.averagePerSurgery} items
+
+DETAILED DATA:
+${filteredData.map(item => 
+  `Surgery ID: ${item.id}
+  Surgery Type: ${item.surgery}
+  Department: ${item.department}
+  Date: ${item.date}
+  Before Count: ${item.beforeCount}
+  After Count: ${item.afterCount}
+  Consumed: ${item.consumed}
+  Items Used: ${item.items}
+  ---`
+).join('\n')}
+    `;
     
     // Simulate PDF download
     const element = document.createElement('a');
-    const file = new Blob([JSON.stringify(reportData, null, 2)], { type: 'text/plain' });
+    const file = new Blob([reportContent], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
-    element.download = `consumption-report-${format(new Date(), 'yyyy-MM-dd')}.txt`;
+    element.download = `consumption-report-${selectedDepartment === "all" ? "all-departments" : selectedDepartment}-${format(new Date(), 'yyyy-MM-dd')}.txt`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
     
     toast({
       title: "PDF Export Successful",
-      description: `Consumption report exported for ${selectedDepartment === "all" ? "all departments" : selectedDepartment}.`,
+      description: `Consumption report exported for ${reportData.department} with ${filteredData.length} records.`,
     });
   };
 
@@ -204,9 +294,22 @@ const ConsumptionReports = () => {
       return;
     }
     
+    const filteredData = getFilteredData();
+    
+    // Create CSV content with filtered data
     const csvContent = [
+      // Header with report info
+      [`HODO Hospital - Consumption Report`],
+      [`Report Period: ${dateFrom ? format(dateFrom, "dd/MM/yyyy") : "N/A"} to ${dateTo ? format(dateTo, "dd/MM/yyyy") : "N/A"}`],
+      [`Department: ${selectedDepartment === "all" ? "All Departments" : selectedDepartment}`],
+      [`Generated on: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`],
+      [`Total Records: ${filteredData.length}`],
+      [`Total Consumption: ${stats.totalConsumption} items`],
+      [],
+      // Data headers
       ['Surgery ID', 'Surgery Type', 'Department', 'Date', 'Before Count', 'After Count', 'Consumed', 'Items Used'],
-      ...consumptionData.map(item => [
+      // Data rows
+      ...filteredData.map(item => [
         item.id, item.surgery, item.department, item.date, 
         item.beforeCount, item.afterCount, item.consumed, item.items
       ])
@@ -215,27 +318,32 @@ const ConsumptionReports = () => {
     const element = document.createElement('a');
     const file = new Blob([csvContent], { type: 'text/csv' });
     element.href = URL.createObjectURL(file);
-    element.download = `consumption-report-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    element.download = `consumption-report-${selectedDepartment === "all" ? "all-departments" : selectedDepartment}-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
     
     toast({
       title: "Excel Export Successful",
-      description: "Consumption report has been exported to Excel successfully.",
+      description: `Consumption report exported with ${filteredData.length} filtered records.`,
     });
   };
 
-  const totalConsumption = consumptionData.reduce((sum, item) => sum + item.consumed, 0);
-  const averageConsumption = (totalConsumption / consumptionData.length).toFixed(1);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <div className="space-y-4 sm:space-y-6 bg-background min-h-screen p-4 sm:p-6">
-      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+    <>
+    <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+    <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
+     
+      <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm p-4 sm:p-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Consumption Reports</h1>
         <p className="text-sm sm:text-base text-gray-600 mt-1">Generate and analyze item consumption reports</p>
       </div>
-
       
       <Card className="bg-white shadow-sm">
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
@@ -343,7 +451,7 @@ const ConsumptionReports = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{totalConsumption}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalConsumption}</div>
             <p className="text-xs sm:text-sm text-gray-600">Items consumed</p>
           </CardContent>
         </Card>
@@ -356,7 +464,7 @@ const ConsumptionReports = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{averageConsumption}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.averagePerSurgery.toFixed(1)}</div>
             <p className="text-xs sm:text-sm text-gray-600">Items per procedure</p>
           </CardContent>
         </Card>
@@ -369,7 +477,7 @@ const ConsumptionReports = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{consumptionData.length}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalSurgery}</div>
             <p className="text-xs sm:text-sm text-gray-600">Procedures tracked</p>
           </CardContent>
         </Card>
@@ -382,7 +490,7 @@ const ConsumptionReports = () => {
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={weeklyData}>
+              <LineChart data={stats.weeklyData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="week" />
                 <YAxis />
@@ -400,12 +508,12 @@ const ConsumptionReports = () => {
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={departmentData}>
+              <BarChart data={stats.departmentData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="department" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="count" fill="#8b5cf6" />
+                <Bar dataKey="totalConsumption" fill="#8b5cf6" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -429,25 +537,25 @@ const ConsumptionReports = () => {
                 </DialogHeader>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <div>
-                    <Label className="text-gray-700 text-sm">Surgery ID</Label>
+                    <Label className="text-black text-sm font-poppins">Surgery ID</Label>
                     <Input
                       value={formData.surgeryId}
                       onChange={(e) => handleInputChange("surgeryId", e.target.value)}
                       placeholder="e.g., SURG004"
-                      className="mt-1 border-gray-300 "
+                      className="mt-1 border-gray-300 text-black font-poppins"
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-700 text-sm">Surgery Type</Label>
+                    <Label className="text-black text-sm font-poppins">Surgery Type</Label>
                     <Input
                       value={formData.surgery}
                       onChange={(e) => handleInputChange("surgery", e.target.value)}
                       placeholder="e.g., Hip Replacement"
-                      className="mt-1 border-gray-300 "
+                      className="mt-1 border-gray-300 text-black font-poppins"
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-700 text-sm">Department</Label>
+                    <Label className="text-black text-sm font-poppins">Department</Label>
                     <Select value={formData.department} onValueChange={(value) => handleInputChange("department", value)}>
                       <SelectTrigger className="border-gray-300  mt-1">
                         <SelectValue placeholder="Select department" />
@@ -462,41 +570,41 @@ const ConsumptionReports = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-gray-700 text-sm">Date</Label>
+                    <Label className="text-black text-sm font-poppins">Date</Label>
                     <Input
                       type="date"
                       value={formData.date}
                       onChange={(e) => handleInputChange("date", e.target.value)}
-                      className="mt-1 border-gray-300 "
+                      className="mt-1 border-gray-300 text-black font-poppins"
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-700 text-sm">Before Count</Label>
+                    <Label className="text-black text-sm font-poppins">Before Count</Label>
                     <Input
                       type="number"
                       value={formData.beforeCount}
                       onChange={(e) => handleInputChange("beforeCount", e.target.value)}
                       placeholder="e.g., 30"
-                      className="mt-1 border-gray-300 f"
+                      className="mt-1 border-gray-300 text-black font-poppins"
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-700 text-sm">After Count</Label>
+                    <Label className="text-black text-sm font-poppins">After Count</Label>
                     <Input
                       type="number"
                       value={formData.afterCount}
                       onChange={(e) => handleInputChange("afterCount", e.target.value)}
                       placeholder="e.g., 25"
-                      className="mt-1 border-gray-300 "
+                      className="mt-1 border-gray-300 text-black font-poppins"
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <Label className="text-gray-700 text-sm">Items Used</Label>
+                    <Label className="text-black text-sm font-poppins">Items Used</Label>
                     <Input
                       value={formData.items}
                       onChange={(e) => handleInputChange("items", e.target.value)}
                       placeholder="e.g., Surgery Kit, Forceps, Clamps"
-                      className="mt-1 border-gray-300 "
+                      className="mt-1 border-gray-300 text-black font-poppins"
                     />
                   </div>
                 </div>
@@ -535,7 +643,7 @@ const ConsumptionReports = () => {
                 </tr>
               </thead>
               <tbody>
-                {consumptionData.map((surgery) => (
+                {stats.filteredData.map((surgery) => (
                   <tr key={surgery.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="p-3 font-medium text-gray-900 text-sm">{surgery.id}</td>
                     <td className="p-3 text-gray-900 text-sm">{surgery.surgery}</td>
@@ -550,9 +658,12 @@ const ConsumptionReports = () => {
               </tbody>
             </table>
           </div>
+          <Footer />
         </CardContent>
       </Card>
     </div>
+   
+    </>
   );
 };
 

@@ -9,8 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { Search, Eye, CheckCircle, Clock, XCircle, Plus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Header from "./Header";
+import Footer from "./Footer";
 
-const ReceiveItems = () => {
+const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
   const navigate = useNavigate();
   const [receivedItems, setReceivedItems] = useState(() => {
     const savedItems = localStorage.getItem('receivedItems');
@@ -173,29 +175,29 @@ const ReceiveItems = () => {
   };
 
   return (
-    <div className="space-y-6 bg-gray-50 min-h-screen p-6">
+    <>
+    <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+    <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Receive Items</h1>
-        <Button
-          variant="outline"
-          onClick={() => navigate('/stock-management')}
-        >
-          View Stock Management
-        </Button>
+        <h1 className="text-2xl font-bold"></h1>
+        
       </div>
-
+      <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm">
       <div className="bg-white rounded-lg shadow-sm p-6">
+      
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Receive Items</h1>
             <p className="text-sm sm:text-base text-gray-600 mt-1">Manage received requests and update status</p>
           </div>
+          
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-[#00A8E8] hover:bg-[#0088cc] text-white">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Receive Item
               </Button>
+              
             </DialogTrigger>
             <DialogContent className="bg-white">
               <DialogHeader>
@@ -229,6 +231,7 @@ const ReceiveItems = () => {
             </DialogContent>
           </Dialog>
         </div>
+      </div>
       </div>
 
       <Card className="bg-white shadow-sm">
@@ -437,6 +440,8 @@ const ReceiveItems = () => {
         </Card>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

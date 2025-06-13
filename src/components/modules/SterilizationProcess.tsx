@@ -7,8 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Play, Pause, Square, Timer, Activity, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Header from "./Header";
+import Footer from "./Footer";
 
-const SterilizationProcess = () => {
+
+const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
   const [processes, setProcesses] = useState(() => {
     const savedProcesses = localStorage.getItem('sterilizationProcesses');
     try {
@@ -227,10 +230,14 @@ const SterilizationProcess = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 bg-gray-50 min-h-screen p-4 sm:p-6">
+    <>
+    <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+    <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
+       <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm">
       <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sterilization Process</h1>
         <p className="text-sm sm:text-base text-gray-600 mt-1">Manage sterilization cycles and monitor progress</p>
+      </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -464,6 +471,8 @@ const SterilizationProcess = () => {
         </Card>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 
