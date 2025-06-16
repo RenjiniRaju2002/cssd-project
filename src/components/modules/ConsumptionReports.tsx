@@ -340,7 +340,7 @@ ${filteredData.map(item =>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
     <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
      
-      <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm p-4 sm:p-6">
+      <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm p-4 sm:p-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Consumption Reports</h1>
         <p className="text-sm sm:text-base text-gray-600 mt-1">Generate and analyze item consumption reports</p>
       </div>
@@ -348,7 +348,7 @@ ${filteredData.map(item =>
       <Card className="bg-white shadow-sm">
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
           <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
-            <BarChart3 className="w-5 h-5 text-[#00A8E8]" />
+            <BarChart3 className="w-5 h-5 text-[#038ba4]" />
             Report Filters
           </CardTitle>
         </CardHeader>
@@ -397,7 +397,7 @@ ${filteredData.map(item =>
             <div>
               <Label className="text-gray-700 text-sm">Department</Label>
               <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                <SelectTrigger className="border-gray-300 hover:border-gray-400 focus:border-[#00A8E8] mt-1">
+                <SelectTrigger className="border-gray-300 hover:border-gray-400 focus:border-[#038ba4] mt-1">
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
@@ -412,7 +412,10 @@ ${filteredData.map(item =>
             </div>
 
             <div className="flex items-end">
-              <Button onClick={generateReport} className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+              <Button 
+                onClick={generateReport} 
+                className="w-full bg-[#038ba4] hover:bg-[#0088cc] text-white"
+              >
                 Generate Report
               </Button>
             </div>
@@ -526,7 +529,7 @@ ${filteredData.map(item =>
             <CardTitle className="text-lg text-gray-900">Surgery Item Consumption Details</CardTitle>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+                <Button className="bg-[#038ba4] hover:bg-[#0088cc] text-white">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Consumption Record
                 </Button>
@@ -611,7 +614,7 @@ ${filteredData.map(item =>
                 <div className="flex gap-4 mt-6">
                   <Button 
                     onClick={handleSubmitForm}
-                    className="bg-[#00A8E8] hover:bg-[#0088cc] text-white"
+                    className="bg-[#038ba4] hover:bg-[#0088cc] text-white"
                   >
                     Add Record
                   </Button>
@@ -658,9 +661,9 @@ ${filteredData.map(item =>
               </tbody>
             </table>
           </div>
-          <Footer />
         </CardContent>
       </Card>
+      <Footer />
     </div>
    
     </>

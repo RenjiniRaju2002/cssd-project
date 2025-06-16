@@ -177,12 +177,12 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-4 sm:space-y-4 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
+      <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold"></h1>
         
       </div>
-      <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm">
+      <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm">
       <div className="bg-white rounded-lg shadow-sm p-6">
       
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -193,7 +193,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
           
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+              <Button className="bg-[#038ba4] hover:bg-[#038ba4]/90 text-white">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Receive Item
               </Button>
@@ -224,7 +224,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
                   <Label htmlFor="receivedQty">Received Quantity</Label>
                   <Input name="receivedQty" type="number" placeholder="Enter received quantity" required className="border-gray-300" />
                 </div>
-                <Button type="submit" className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+                <Button type="submit" className="w-full bg-[#038ba4] hover:bg-[#038ba4]/90 text-white">
                   Add Item
                 </Button>
               </form>
@@ -248,7 +248,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-48 border-gray-300 hover:border-gray-400 focus:border-[#00A8E8]">
+              <SelectTrigger className="w-full sm:w-48 border-gray-300 hover:border-gray-400 focus:border-[#038ba4]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent className="bg-white">
@@ -293,7 +293,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
                                           newQty < item.quantity ? "Partial" : "Complete";
                           updateItemStatus(item.id, newStatus, newQty);
                         }}
-                        className="w-16 sm:w-20 border-gray-300 hover:border-gray-400 focus:border-[#00A8E8] text-sm"
+                        className="w-16 sm:w-20 border-gray-300 hover:border-gray-400 focus:border-[#038ba4] text-sm"
                         min="0"
                         max={item.quantity}
                       />
@@ -306,10 +306,9 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
                           onValueChange={(newStatus) => {
                             handleUpdateStatus(item.id, newStatus);
                           }}
-                          className="w-full sm:w-48 border-gray-300 hover:border-gray-400 focus:border-[#00A8E8]"
                         >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
+                          <SelectTrigger className="w-full sm:w-48 border-gray-300 hover:border-gray-400 focus:border-[#038ba4]">
+                            <SelectValue placeholder="Update status" />
                           </SelectTrigger>
                           <SelectContent className="bg-white">
                             <SelectItem value="Pending">Pending</SelectItem>

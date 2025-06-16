@@ -8,22 +8,26 @@ import IssueItem from "../modules/IssueItem";
 import StockManagement from "../modules/StockManagement";
 import ConsumptionReports from "../modules/ConsumptionReports";
 import Dashboard from "../modules/Dashboard";
+import { useSidebar } from "@/components/ui/sidebar";
 
 const CssdLayout = () => {
+  const { state, toggleSidebar } = useSidebar();
+  const sidebarCollapsed = state === "collapsed";
+
   return (
     <>
       <AppSidebar />
       <main className="flex-1 flex flex-col">
-        <CssdNavbar />
+        <CssdNavbar sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
         <div className="flex-1 bg-background">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/request-management" element={<RequestManagement />} />
-            <Route path="/receive-items" element={<ReceiveItems />} />
-            <Route path="/sterilization-process" element={<SterilizationProcess />} />
-            <Route path="/issue-item" element={<IssueItem />} />
-            <Route path="/stock-management" element={<StockManagement />} />
-            <Route path="/consumption-reports" element={<ConsumptionReports />} />
+            <Route path="/" element={<Dashboard sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />} />
+            <Route path="/request-management" element={<RequestManagement sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />} />
+            <Route path="/receive-items" element={<ReceiveItems sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />} />
+            <Route path="/sterilization-process" element={<SterilizationProcess sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />} />
+            <Route path="/issue-item" element={<IssueItem sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />} />
+            <Route path="/stock-management" element={<StockManagement sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />} />
+            <Route path="/consumption-reports" element={<ConsumptionReports sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />} />
           </Routes>
         </div>
       </main>

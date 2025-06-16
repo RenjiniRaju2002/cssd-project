@@ -1,7 +1,10 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import './Footer.css';
+import { ShortcutsModal } from '@/components/ui/shortcuts-modal';
 
 const Footer: FC = () => {
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+
   const toggleFullscreen = (): void => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err: any) => {
@@ -13,19 +16,31 @@ const Footer: FC = () => {
   };
 
   return (
-    <div className="footer-container">
-      <div className="footer-left">
-        <span>© 2025</span>
-        <a href="#">www.hodo.com</a>
-        <span>Empowering Entrepreneurs in Healthcare</span>
-        <a href="#">Short Cuts</a>
+    <>
+      <div className="footer-container">
+        <div className="footer-left">
+          <span>© 2025</span>
+          <a href="#">www.hodo.com</a>
+          <span>Empowering Entrepreneurs in Healthcare</span>
+          <button 
+            onClick={() => setIsShortcutsOpen(true)}
+            className="text-[#0d92ae] hover:text-[#006688] hover:underline transition-colors"
+          >
+            Shortcuts
+          </button>
+        </div>
+        <div className="footer-right">
+          <button onClick={toggleFullscreen} className="fullscreen-btn" title="Toggle Fullscreen">
+            ⛶
+          </button>
+        </div>
       </div>
-      <div className="footer-right">
-        <button onClick={toggleFullscreen} className="fullscreen-btn" title="Toggle Fullscreen">
-          ⛶
-        </button>
-      </div>
-    </div>
+
+      <ShortcutsModal 
+        isOpen={isShortcutsOpen}
+        onClose={() => setIsShortcutsOpen(false)}
+      />
+    </>
   );
 };
 

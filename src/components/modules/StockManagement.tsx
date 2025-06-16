@@ -144,7 +144,7 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
     <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
-       <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm">
+       <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h1 className="text-3xl font-bold text-gray-900">Stock Management</h1>
         <p className="text-gray-600">Manage inventory items and stock levels</p>
@@ -155,12 +155,12 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
         <CardHeader className="border-b border-gray-200">
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center gap-2 text-gray-900">
-              <Package className="w-5 h-5 text-[#00A8E8]" />
+              <Package className="w-5 h-5 text-[#038ba4]" />
               Inventory Management
             </CardTitle>
             <Dialog open={showAddItem} onOpenChange={setShowAddItem}>
               <DialogTrigger asChild>
-                <Button className="bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+                <Button className="bg-[#038ba4] hover:bg-[#038ba4]/90 text-white">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Item
                 </Button>
@@ -200,7 +200,7 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                     <Label htmlFor="location" className="text-gray-700">Location</Label>
                     <Input name="location" placeholder="Storage location" required className="border-gray-300" />
                   </div>
-                  <Button type="submit" className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+                  <Button type="submit" className="w-full bg-[#038ba4] hover:bg-[#038ba4]/90 text-white">
                     Add Item
                   </Button>
                 </form>
@@ -335,7 +335,7 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                   className="border-gray-300" 
                 />
               </div>
-              <Button type="submit" className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+              <Button type="submit" className="w-full bg-[#038ba4] hover:bg-[#038ba4]/90 text-white">
                 Update Item
               </Button>
             </form>

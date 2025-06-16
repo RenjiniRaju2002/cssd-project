@@ -233,7 +233,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
     <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
-       <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm">
+       <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm">
       <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sterilization Process</h1>
         <p className="text-sm sm:text-base text-gray-600 mt-1">Manage sterilization cycles and monitor progress</p>
@@ -244,7 +244,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
         <Card className="bg-white shadow-sm border-0">
           <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
             <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
-              <Play className="w-5 h-5 text-[#00A8E8]" />
+              <Play className="w-5 h-5 text-[#038ba4]" />
               Start New Sterilization
             </CardTitle>
           </CardHeader>
@@ -253,7 +253,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
               <div>
                 <Label htmlFor="machine" className="text-gray-700 text-sm">Select Machine</Label>
                 <Select value={selectedMachine} onValueChange={setSelectedMachine} required>
-                  <SelectTrigger className="border-gray-300 hover:border-gray-400 focus:border-[#00A8E8] mt-1">
+                  <SelectTrigger className="border-gray-300 hover:border-gray-400 focus:border-[#038ba4] mt-1">
                     <SelectValue placeholder="Choose sterilization machine" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-0">
@@ -269,7 +269,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
               <div>
                 <Label htmlFor="process" className="text-gray-700 text-sm">Sterilization Method</Label>
                 <Select value={selectedProcess} onValueChange={setSelectedProcess} required>
-                  <SelectTrigger className="border-gray-300 hover:border-gray-400 focus:border-[#00A8E8] mt-1">
+                  <SelectTrigger className="border-gray-300 hover:border-gray-400 focus:border-[#038ba4] mt-1">
                     <SelectValue placeholder="Choose sterilization method" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-0">
@@ -288,13 +288,13 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
                   name="itemId" 
                   placeholder="Enter request ID" 
                   required 
-                  className="border-gray-300 hover:border-gray-400 focus:border-[#00A8E8] mt-1" 
+                  className="border-gray-300 hover:border-gray-400 focus:border-[#038ba4] mt-1" 
                 />
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white text-sm py-2" 
+                className="w-full bg-[#038ba4] hover:bg-[#038ba4] text-white text-sm py-2" 
                 disabled={!selectedMachine || !selectedProcess}
               >
                 Start Sterilization Process
@@ -340,7 +340,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
       <Card className="bg-white shadow-sm border-0">
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
           <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
-            <Timer className="w-5 h-5 text-[#00A8E8]" />
+            <Timer className="w-5 h-5 text-[#038ba4]" />
             Active Processes
           </CardTitle>
         </CardHeader>
@@ -398,7 +398,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
                               variant="outline" 
                               size="sm"
                               onClick={() => completeProcess(process.id)}
-                              className="bg-[#00A8E8] text-white hover:bg-[#0088cc] border-0 p-1 sm:p-2"
+                              className="bg-[#038ba4] text-white hover:bg-[#0088cc] border-0 p-1 sm:p-2"
                             >
                               <Square className="w-3 h-3 sm:w-4 sm:h-4" />
                             </Button>
@@ -409,7 +409,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
                             variant="outline" 
                             size="sm"
                             onClick={() => resumeProcess(process.id)}
-                            className="bg-[#00A8E8] text-white hover:bg-[#0088cc] border-0 p-1 sm:p-2"
+                            className="bg-[#038ba4] text-white hover:bg-[#0088cc] border-0 p-1 sm:p-2"
                           >
                             <Play className="w-3 h-3 sm:w-4 sm:h-4" />
                           </Button>

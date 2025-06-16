@@ -92,7 +92,7 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
     <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
   
       
-      <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm p-4 sm:p-6">
+      <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm p-4 sm:p-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-sm sm:text-base text-gray-600 mt-1">Central Sterile Service Department</p>
       </div>
@@ -180,14 +180,14 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
                 onClick={handleNewRequest}
                 className="p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors bg-white"
               >
-                <Package className="h-5 sm:h-6 w-5 sm:w-6 mx-auto mb-2 text-[#00A8E8]" />
+                <Package className="h-5 sm:h-6 w-5 sm:w-6 mx-auto mb-2 text-[#038ba4]" />
                 <p className="text-xs sm:text-sm font-medium text-gray-900">New Request</p>
               </button>
               <button 
                 onClick={handleStartSterilization}
                 className="p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors bg-white"
               >
-                <Activity className="h-5 sm:h-6 w-5 sm:w-6 mx-auto mb-2 text-[#00A8E8]" />
+                <Activity className="h-5 sm:h-6 w-5 sm:w-6 mx-auto mb-2 text-[#038ba4]" />
                 <p className="text-xs sm:text-sm font-medium text-gray-900">Start Sterilization</p>
               </button>
             </div>

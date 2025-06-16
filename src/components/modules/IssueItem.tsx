@@ -75,7 +75,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
     <div className="space-y-6 bg-[#d9e0e7] min-h-screen p-6">
       
 
-      <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm p-6">
+      <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm p-6">
         <h1 className="text-3xl font-bold text-gray-900">Issue Item</h1>
         <p className="text-gray-600">Issue sterilized items to departments and outlets</p>
       </div>
@@ -84,7 +84,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
         <Card className="bg-white shadow-sm border-0">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-gray-900">
-              <Send className="w-5 h-5 text-[#00A8E8]" />
+              <Send className="w-5 h-5 text-[#038ba4]" />
               Issue Items
             </CardTitle>
           </CardHeader>
@@ -145,7 +145,10 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+              <Button 
+                type="submit" 
+                className="w-full bg-[#038ba4] hover:bg-[#038ba4]/90 text-white"
+              >
                 Issue Item
               </Button>
             </form>
@@ -155,7 +158,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
         <Card className="bg-white shadow-sm border-0">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-gray-900">
-              <CheckCircle className="w-5 h-5 text-[#00A8E8]" />
+              <CheckCircle className="w-5 h-5 text-[#038ba4]" />
               Available Items
             </CardTitle>
           </CardHeader>

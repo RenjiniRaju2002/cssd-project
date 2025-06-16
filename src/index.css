@@ -15,7 +15,7 @@
     --popover: 255 255 255;
     --popover-foreground: 17 24 39;
 
-    --primary: 0 168 232; /* Changed to #00A8E8 */
+    --primary: 3 139 164; /* Changed to #038ba4 */
     --primary-foreground: 255 255 255;
 
     --secondary: 243 244 246;
@@ -24,7 +24,7 @@
     --muted: 243 244 246;
     --muted-foreground: 107 114 128;
 
-    --accent: 0 168 232; /* Changed to #00A8E8 */
+    --accent: 3 139 164; /* Changed to #038ba4 */
     --accent-foreground: 255 255 255;
 
     --destructive: 239 68 68;
@@ -34,18 +34,18 @@
     --card-border: None; /* Changed from yellow to transparent */
     --dropdown-border: None; /* Changed from yellow to transparent */
     --input: 255 255 255;
-    --ring: 0 168 232; /* Changed to #00A8E8 */
+    --ring: 3 139 164; /* Changed to #038ba4 */
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0 0; /* Changed to dark black */
     --sidebar-foreground:None;
-    --sidebar-primary: 0 168 232; /* Changed to #00A8E8 */
+    --sidebar-primary: 3 139 164; /* Changed to #038ba4 */
     --sidebar-primary-foreground:None;
     --sidebar-accent: 17 17 17; /* Changed to darker black */
     --sidebar-accent-foreground:None;
     --sidebar-border: 17 17 17; /* Changed to darker black */
-    --sidebar-ring: 0 168 232; /* Changed to #00A8E8 */
+    --sidebar-ring: 3 139 164; /* Changed to #038ba4 */
 
     font-family: 'Poppins', sans-serif;
     font-weight: 500;
