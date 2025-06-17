@@ -1,0 +1,47 @@
+{
+  "statistics": {
+    "totalRequests": 45,
+    "pendingRequests": 12,
+    "completedRequests": 28,
+    "inProgressRequests": 5,
+    "totalItems": 156,
+    "lowStockItems": 8,
+    "sterilizationProcesses": 3
+  },
+  "recentActivities": [
+    {
+      "id": "ACT001",
+      "type": "request",
+      "message": "New request REQ045 created",
+      "timestamp": "2024-06-10T14:30:00.000Z",
+      "department": "OR-1"
+    },
+    {
+      "id": "ACT002", 
+      "type": "sterilization",
+      "message": "Sterilization process STE012 completed",
+      "timestamp": "2024-06-10T13:45:00.000Z",
+      "department": "Sterilization"
+    },
+    {
+      "id": "ACT003",
+      "type": "issue",
+      "message": "Items issued to ICU",
+      "timestamp": "2024-06-10T12:15:00.000Z", 
+      "department": "ICU"
+    }
+  ],
+  "chartData": {
+    "requestsByStatus": [
+      { "status": "Completed", "count": 28 },
+      { "status": "Pending", "count": 12 },
+      { "status": "In Progress", "count": 5 }
+    ],
+    "requestsByDepartment": [
+      { "department": "OR-1", "count": 15 },
+      { "department": "OR-2", "count": 12 },
+      { "department": "ICU", "count": 10 },
+      { "department": "Emergency", "count": 8 }
+    ]
+  }
+} 

@@ -14,14 +14,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useLocation } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
+import initialData from "../../data/requestManagementData.json";
 
 
 const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
-  const [requests, setRequests] = useState([
-    { id: "REQ001", department: "OR-1", priority: "High", items: "Surgery Kit", quantity: 2, status: "Pending", date: "2024-06-10" },
-    { id: "REQ002", department: "OR-2", priority: "Medium", items: "Instruments", quantity: 5, status: "Processing", date: "2024-06-10" },
-    { id: "REQ003", department: "ICU", priority: "Low", items: "Basic Kit", quantity: 3, status: "Completed", date: "2024-06-09" }
-  ]);
+  const [requests, setRequests] = useState(initialData.requests);
+  const [packageKits, setPackageKits] = useState(initialData.packageKits);
+  const [workflowItems, setWorkflowItems] = useState(initialData.workflowItems);
 
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
@@ -32,6 +31,10 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
     const savedRequests = localStorage.getItem('cssdRequests');
     if (savedRequests) {
       setRequests(JSON.parse(savedRequests));
+    } else {
+      // Initialize with JSON data if no localStorage data exists
+      setRequests(initialData.requests);
+      localStorage.setItem('cssdRequests', JSON.stringify(initialData.requests));
     }
   }, []);
 
@@ -48,16 +51,11 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [showStatusChange, setShowStatusChange] = useState(false);
-  const [packageKits, setPackageKits] = useState([
-    { id: "KIT001", requestId: "REQ001", name: "Basic Surgery Kit", items: ["Forceps", "Scissors", "Clamps"], department: "OR-1", creationDate: "2024-06-10" },
-    { id: "KIT002", requestId: "REQ002", name: "Cardiac Kit", items: ["Cardiac Forceps", "Retractors", "Sutures"], department: "OR-2", creationDate: "2024-06-10" }
-  ]);
 
   // Cleanup effect when component unmounts
   useEffect(() => {
     return () => {
       // Reset component state but keep localStorage data
-      setPackageKits([]);
       setShowCreateKit(false);
       setSelectedRequest(null);
       setShowRequestDetails(false);
@@ -100,6 +98,10 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
     const savedKits = localStorage.getItem('cssdPackageKits');
     if (savedKits) {
       setPackageKits(JSON.parse(savedKits));
+    } else {
+      // Initialize with JSON data if no localStorage data exists
+      setPackageKits(initialData.packageKits);
+      localStorage.setItem('cssdPackageKits', JSON.stringify(initialData.packageKits));
     }
   }, []);
 
@@ -108,13 +110,15 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
     localStorage.setItem('cssdPackageKits', JSON.stringify(packageKits));
   }, [packageKits]);
 
-  const [workflowItems, setWorkflowItems] = useState([]);
-
   // Load workflow items from localStorage on component mount
   useEffect(() => {
     const savedWorkflowItems = localStorage.getItem('cssdWorkflowItems');
     if (savedWorkflowItems) {
       setWorkflowItems(JSON.parse(savedWorkflowItems));
+    } else {
+      // Initialize with JSON data if no localStorage data exists
+      setWorkflowItems(initialData.workflowItems);
+      localStorage.setItem('cssdWorkflowItems', JSON.stringify(initialData.workflowItems));
     }
   }, []);
 
@@ -137,6 +141,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
       department: formData.get('department') as string,
       items: formData.get('items') as string,
       quantity: parseInt(formData.get('quantity') as string),
+      priority: formData.get('priority') as string,
       status: "Requested",
       date: new Date().toISOString().split('T')[0],
       time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
@@ -358,8 +363,8 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
-       <div className="border-t-4 border-[#00A8E8] bg-white rounded-lg shadow-sm">
+    <div className="space-y-4 sm:space-y-5 bg-[#d9e0e7] min-h-screen p-2 sm:p-2">
+       <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h1 className="text-3xl font-bold text-gray-900">Request Management</h1>
         <p className="text-gray-600">Create and manage sterilization requests</p>
@@ -369,7 +374,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
         <Card className="bg-white shadow-sm">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-gray-900">
-              <Plus className="w-5 h-5 text-[#00A8E8]" />
+              <Plus className="w-5 h-5 text-[#038ba4]" />
               Create New Request
             </CardTitle>
           </CardHeader>
@@ -379,28 +384,28 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                 <div>
                   <Label htmlFor="department" className="text-gray-700">Department</Label>
                   <Select name="department" required>
-                    <SelectTrigger className="border-gray-300">
-                      <SelectValue placeholder="Select department " />
+                    <SelectTrigger className="border-gray-300 text-black">
+                      <SelectValue placeholder="Select department " className="text-black" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
-                      <SelectItem value="OR-1">OR-1</SelectItem>
-                      <SelectItem value="OR-2">OR-2</SelectItem>
-                      <SelectItem value="OR-3">OR-3</SelectItem>
-                      <SelectItem value="ICU">ICU</SelectItem>
-                      <SelectItem value="Emergency">Emergency</SelectItem>
+                      <SelectItem value="OR-1" className="text-black">OR-1</SelectItem>
+                      <SelectItem value="OR-2" className="text-black">OR-2</SelectItem>
+                      <SelectItem value="OR-3" className="text-black">OR-3</SelectItem>
+                      <SelectItem value="ICU" className="text-black">ICU</SelectItem>
+                      <SelectItem value="Emergency" className="text-black">Emergency</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="priority" className="text-gray-700">Priority</Label>
+                  <Label htmlFor="priority" className="text-black">Priority</Label>
                   <Select name="priority" required>
-                    <SelectTrigger className="border-gray-300">
-                      <SelectValue placeholder="Select priority" />
+                    <SelectTrigger className="border-gray-300 text-black">
+                      <SelectValue placeholder="Select priority" className="text-black" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
-                      <SelectItem value="High">High</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Low">Low</SelectItem>
+                      <SelectItem value="High" className="text-black">High</SelectItem>
+                      <SelectItem value="Medium" className="text-black">Medium</SelectItem>
+                      <SelectItem value="Low" className="text-black">Low</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -408,13 +413,13 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
               
               <div>
                 <Label htmlFor="items" className="text-gray-700">Items Description</Label>
-                <Textarea name="items" placeholder="Describe the items needed" required className="border-gray-300" />
+                <Textarea name="items" placeholder="Describe the items needed" required className="border-gray-300 text-black placeholder-black" />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="quantity" className="text-gray-700">Quantity</Label>
-                  <Input type="number" name="quantity" min="1" required className="border-gray-300" />
+                  <Input name="quantity" type="number" placeholder="Enter quantity" required className="border-gray-300 text-black placeholder-black" />
                 </div>
                 <div>
                   <Label className="text-gray-700">Required Date</Label>
@@ -437,7 +442,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                 </div>
               </div>
               
-              <Button type="submit" className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+              <Button type="submit" className="w-full bg-[#038ba4] hover:bg-[#027a8f] text-white">
                 Create Request
               </Button>
             </form>
@@ -448,7 +453,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-gray-900">
-                <Package className="w-5 h-5 text-[#00A8E8]" />
+                <Package className="w-5 h-5 text-[#038ba4]" />
                 Package Kits
               </span>
               <Dialog open={showCreateKit} onOpenChange={setShowCreateKit}>
@@ -464,48 +469,48 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                   <form onSubmit={handleCreateKit} className="space-y-4">
                     <div>
                       <Label htmlFor="kitName" className="text-gray-700">Kit Name</Label>
-                      <Input name="kitName" placeholder="Enter kit name" required className="border-gray-300" />
+                      <Input name="kitName" placeholder="Enter kit name" required className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black placeholder-black" />
                     </div>
                     <div>
                       <Label htmlFor="kitItems" className="text-gray-700">Kit Items (comma-separated)</Label>
-                      <Textarea name="kitItems" placeholder="Enter items separated by commas" required className="border-gray-300" />
+                      <Textarea name="kitItems" placeholder="Enter items separated by commas" required className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black placeholder-black" />
                     </div>
                     <div>
                       <Label htmlFor="kitDepartment" className="text-gray-700">Department</Label>
-                      <Input name="kitDepartment" placeholder="Enter department" required className="border-gray-300" />
+                      <Input name="kitDepartment" placeholder="Enter department" required className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black placeholder-black" />
                     </div>
                     <div>
                       <Label htmlFor="priority" className="text-gray-700">Priority</Label>
                       <Select name="priority" required>
-                        <SelectTrigger className="border-gray-300">
-                          <SelectValue placeholder="Select priority" />
+                        <SelectTrigger className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black">
+                          <SelectValue placeholder="Select priority" className="text-black" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border-0">
-                          <SelectItem value="High">High</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="Low">Low</SelectItem>
+                          <SelectItem value="High" className="text-black">High</SelectItem>
+                          <SelectItem value="Medium" className="text-black">Medium</SelectItem>
+                          <SelectItem value="Low" className="text-black">Low</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
                       <Label htmlFor="status" className="text-gray-700">Status</Label>
                       <Select name="status" required>
-                        <SelectTrigger className="border-gray-300">
-                          <SelectValue placeholder="Select status" />
+                        <SelectTrigger className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black">
+                          <SelectValue placeholder="Select status" className="text-black" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border-0">
-                          <SelectItem value="Requested">Requested</SelectItem>
-                          <SelectItem value="Pending">Pending</SelectItem>
-                          <SelectItem value="Processing">Processing</SelectItem>
-                          <SelectItem value="Completed">Completed</SelectItem>
+                          <SelectItem value="Requested" className="text-black">Requested</SelectItem>
+                          <SelectItem value="Pending" className="text-black">Pending</SelectItem>
+                          <SelectItem value="Processing" className="text-black">Processing</SelectItem>
+                          <SelectItem value="Completed" className="text-black">Completed</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
                       <Label htmlFor="quantity" className="text-gray-700">Quantity</Label>
-                      <Input name="quantity" type="number" placeholder="Enter quantity" required className="border-gray-300" />
+                      <Input name="quantity" type="number" placeholder="Enter quantity" required className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black placeholder-black" />
                     </div>
-                    <Button type="submit" className="w-full bg-[#00A8E8] hover:bg-[#0088cc] text-white">
+                    <Button type="submit" className="w-full bg-[#038ba4] hover:bg-[#027a8f] text-white">
                       Create Package Kit
                     </Button>
                   </form>
@@ -517,7 +522,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
             <div className="flex justify-between items-center mb-4">
               <Input 
                 placeholder="Search kits..." 
-                className="border-gray-300 w-64"
+                className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] w-64"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -764,7 +769,6 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
               <div>
                 <Label htmlFor="newStatus" className="text-gray-700">Status</Label>
                 <Select 
-                  id="newStatus"
                   value={selectedRequest?.status || ""} 
                   onValueChange={(value) => {
                     handleUpdateStatus(selectedRequest?.id || "", value);

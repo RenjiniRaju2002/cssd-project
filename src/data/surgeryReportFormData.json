@@ -1,0 +1,34 @@
+{
+  "items": [],
+  "surgeryTypes": [
+    "Cardiac Surgery",
+    "General Surgery", 
+    "Orthopedic Surgery",
+    "Neurological Surgery",
+    "Gynecological Surgery",
+    "Urological Surgery",
+    "Emergency Surgery"
+  ],
+  "surgeons": [
+    "Dr. Smith",
+    "Dr. Johnson",
+    "Dr. Williams",
+    "Dr. Brown",
+    "Dr. Davis",
+    "Dr. Miller"
+  ],
+  "departments": [
+    "OR-1",
+    "OR-2",
+    "OR-3",
+    "Emergency OR",
+    "Day Surgery"
+  ],
+  "itemCategories": [
+    "Surgical Instruments",
+    "Sutures",
+    "Dressings",
+    "Medications",
+    "Equipment"
+  ]
+} 

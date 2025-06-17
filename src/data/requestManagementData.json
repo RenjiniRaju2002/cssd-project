@@ -1,0 +1,78 @@
+{
+  "requests": [
+    {
+      "id": "REQ001",
+      "department": "OR-1",
+      "priority": "High",
+      "items": "Surgery Kit",
+      "quantity": 2,
+      "status": "Pending",
+      "date": "2024-06-10"
+    },
+    {
+      "id": "REQ002",
+      "department": "OR-2",
+      "priority": "Medium",
+      "items": "Instruments",
+      "quantity": 5,
+      "status": "Processing",
+      "date": "2024-06-10"
+    },
+    {
+      "id": "REQ003",
+      "department": "ICU",
+      "priority": "Low",
+      "items": "Basic Kit",
+      "quantity": 3,
+      "status": "Completed",
+      "date": "2024-06-09"
+    }
+  ],
+  "packageKits": [
+    {
+      "id": "KIT001",
+      "requestId": "REQ001",
+      "name": "Basic Surgery Kit",
+      "items": ["Forceps", "Scissors", "Clamps"],
+      "department": "OR-1",
+      "creationDate": "2024-06-10"
+    },
+    {
+      "id": "KIT002",
+      "requestId": "REQ002",
+      "name": "Cardiac Kit",
+      "items": ["Cardiac Forceps", "Retractors", "Sutures"],
+      "department": "OR-2",
+      "creationDate": "2024-06-10"
+    }
+  ],
+  "workflowItems": [
+    {
+      "id": "REQ001",
+      "requestId": "REQ001",
+      "kitId": "KIT001",
+      "sterilizationId": "",
+      "currentStatus": "Pending",
+      "timestamp": "2024-06-10T10:00:00.000Z",
+      "location": "Processing"
+    },
+    {
+      "id": "REQ002",
+      "requestId": "REQ002",
+      "kitId": "KIT002",
+      "sterilizationId": "",
+      "currentStatus": "Processing",
+      "timestamp": "2024-06-10T11:00:00.000Z",
+      "location": "Sterilization"
+    },
+    {
+      "id": "REQ003",
+      "requestId": "REQ003",
+      "kitId": "",
+      "sterilizationId": "",
+      "currentStatus": "Completed",
+      "timestamp": "2024-06-09T15:00:00.000Z",
+      "location": "Completed"
+    }
+  ]
+} 

@@ -69,3 +69,63 @@
     @apply bg-black text-white; /* Changed to pure black */
   }
 }
+
+@layer components {
+  .btn-with-gradient {
+    background: linear-gradient(135deg, rgb(5, 130, 172), rgb(16, 85, 97));
+    width: fit-content;
+    border-radius: 3px;
+    font-size: 14px;
+    height: 30px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+    color: white;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-with-gradient:hover {
+    background: linear-gradient(135deg, rgb(4, 120, 162), rgb(14, 75, 87));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-with-gradient:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Fixed navbar buttons - prevent movement on click */
+  .navbar-button {
+    position: relative;
+    border: 2px solid transparent;
+    outline: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  .navbar-button:focus {
+    outline: none;
+    border-color: transparent;
+  }
+
+  .navbar-button:active {
+    transform: none;
+    border-color: transparent;
+  }
+
+  /* Prevent text selection on navbar buttons */
+  .navbar-button * {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "availableItems": [
+    {
+      "id": "REQ001",
+      "department": "OR-1",
+      "items": "Surgery Kit",
+      "quantity": 2,
+      "status": "Sterilized",
+      "readyTime": "14:00"
+    },
+    {
+      "id": "REQ003",
+      "department": "ICU",
+      "items": "Medical Tools",
+      "quantity": 4,
+      "status": "Sterilized",
+      "readyTime": "13:30"
+    },
+    {
+      "id": "REQ004",
+      "department": "OR-3",
+      "items": "Emergency Kit",
+      "quantity": 1,
+      "status": "Sterilized",
+      "readyTime": "15:00"
+    }
+  ],
+  "issuedItems": [],
+  "departments": [
+    "OR-1",
+    "OR-2", 
+    "OR-3",
+    "ICU",
+    "Emergency",
+    "Ward-A",
+    "Ward-B"
+  ]
+} 

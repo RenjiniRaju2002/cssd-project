@@ -19,10 +19,15 @@ import {
   Database, 
   BarChart3,
   Building2,
+  Search,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCaretRight } from '@fortawesome/free-solid-svg-icons';
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const menuItems = [
   {
@@ -64,35 +69,79 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const { state } = useSidebar();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredMenuItems, setFilteredMenuItems] = useState(menuItems);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim()) {
+      const filtered = menuItems.filter(item => 
+        item.title.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredMenuItems(filtered);
+    } else {
+      setFilteredMenuItems(menuItems);
+    }
+  };
 
   return (
     <Sidebar className="bg-black fixed h-screen border-r border-gray-800 mt-20" data-state={state}>
       <SidebarHeader className="p-4 border-b border-gray-800">
-        
+        {/* Profile Section */}
+        <div className="flex items-center mb-6 mt-2">
+          <Avatar className="w-12 h-12">
+            {/* Set default Christmas profile image */}
+            <AvatarImage src="src\components\layout\proimg.png" alt="Profile" />
+            <AvatarFallback>SA</AvatarFallback>
+          </Avatar>
+          <div className="ml-4 text-left">
+            <div className="text-white font-semibold text-base leading-tight">system admin</div>
+            <div className="text-sm text-[#038ba4] leading-tight">HODO Hospital, Kazhakkottam</div>
+            <div className="text-xs text-[#038ba4] leading-tight">System Admin</div>
+          </div>
+        </div>
+        {/* Search Section */}
+        <div className="relative mt-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search components..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-10  text-white placeholder-gray-400  bg-black border-[#038ba4] focus:ring-[#038ba4]"
+            />
+          </div>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-300 text-sm font-medium px-4 py-2">
-            <Building2 className="w-4 h-4 mr-2" />
-            CSSD Module
-          </SidebarGroupLabel>
+          
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={location.pathname === item.url}
-                    className="hover:bg-[#b2e4f1] text-gray-300 hover:text-black data-[active=true]:bg-[#038ba4] data-[active=true]:text-white"
-                  >
-                    <Link to={item.url} className="flex items-center gap-3 px-4 py-2">
-                      <FontAwesomeIcon icon={item.icon} className="w-4 h-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {filteredMenuItems.length > 0 ? (
+                filteredMenuItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={location.pathname === item.url}
+                      className="hover:bg-[#b2e4f1] text-gray-300 hover:text-black data-[active=true]:bg-[#038ba4] data-[active=true]:text-white"
+                    >
+                      <Link to={item.url} className="flex items-center gap-3 px-4 py-2">
+                        <FontAwesomeIcon icon={item.icon} className="w-4 h-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+              ) : (
+                <div className="px-4 py-2 text-gray-400 text-sm">
+                  No components found
+                </div>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

@@ -1,0 +1,51 @@
+{
+  "machines": [
+    {
+      "id": "autoclave-1",
+      "name": "Autoclave-1",
+      "status": "Available"
+    },
+    {
+      "id": "autoclave-2",
+      "name": "Autoclave-2",
+      "status": "In Use"
+    },
+    {
+      "id": "autoclave-3",
+      "name": "Autoclave-3",
+      "status": "Maintenance"
+    },
+    {
+      "id": "chemical-1",
+      "name": "Chemical Sterilizer-1",
+      "status": "Available"
+    }
+  ],
+  "sterilizationMethods": [
+    {
+      "id": "steam",
+      "name": "Steam Sterilization",
+      "duration": 45,
+      "temp": "121°C"
+    },
+    {
+      "id": "chemical",
+      "name": "Chemical Sterilization",
+      "duration": 75,
+      "temp": "Room Temp"
+    },
+    {
+      "id": "plasma",
+      "name": "Plasma Sterilization",
+      "duration": 60,
+      "temp": "50°C"
+    },
+    {
+      "id": "ethylene",
+      "name": "Ethylene Oxide",
+      "duration": 180,
+      "temp": "55°C"
+    }
+  ],
+  "processes": []
+} 

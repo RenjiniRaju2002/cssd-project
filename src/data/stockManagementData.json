@@ -1,0 +1,42 @@
+{
+  "stockItems": [
+    {
+      "id": "STK001",
+      "name": "Surgery Kit",
+      "category": "Reusable",
+      "quantity": 25,
+      "location": "Storage A",
+      "minLevel": 10,
+      "status": "In Stock"
+    },
+    {
+      "id": "STK002",
+      "name": "Forceps",
+      "category": "Reusable",
+      "quantity": 15,
+      "location": "Storage B",
+      "minLevel": 5,
+      "status": "Low Stock"
+    },
+    {
+      "id": "STK003",
+      "name": "Gauze",
+      "category": "Non-Reusable",
+      "quantity": 100,
+      "location": "Storage C",
+      "minLevel": 20,
+      "status": "In Stock"
+    }
+  ],
+  "categories": [
+    "Reusable",
+    "Non-Reusable"
+  ],
+  "locations": [
+    "Storage A",
+    "Storage B",
+    "Storage C",
+    "Sterilization Area",
+    "Receiving Area"
+  ]
+} 

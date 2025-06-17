@@ -1,0 +1,67 @@
+{
+  "receivedItems": [
+    {
+      "id": "REC001",
+      "requestId": "REQ001",
+      "department": "Surgery",
+      "items": "Surgical Tools",
+      "quantity": 5,
+      "receivedQty": 5,
+      "status": "Complete",
+      "date": "2024-06-10",
+      "time": "12:00"
+    },
+    {
+      "id": "REC002",
+      "requestId": "REQ002",
+      "department": "ICU",
+      "items": "Medical Tools",
+      "quantity": 4,
+      "receivedQty": 4,
+      "status": "Complete",
+      "date": "2024-06-10",
+      "time": "13:00"
+    },
+    {
+      "id": "REC003",
+      "requestId": "REQ003",
+      "department": "ICU",
+      "items": "Medical Tools",
+      "quantity": 4,
+      "receivedQty": 0,
+      "status": "Pending",
+      "date": "2024-06-10",
+      "time": "12:00"
+    }
+  ],
+  "workflowItems": [
+    {
+      "requestId": "REQ001",
+      "currentStatus": "Ordered",
+      "timestamp": "2024-06-09T14:30:00.000Z",
+      "location": "Warehouse"
+    },
+    {
+      "requestId": "REQ002",
+      "currentStatus": "Shipped",
+      "timestamp": "2024-06-09T16:00:00.000Z",
+      "location": "In Transit"
+    },
+    {
+      "requestId": "REQ003",
+      "currentStatus": "Ordered",
+      "timestamp": "2024-06-09T10:00:00.000Z",
+      "location": "Warehouse"
+    }
+  ],
+  "departments": [
+    "Surgery",
+    "ICU",
+    "Emergency",
+    "OR-1",
+    "OR-2",
+    "OR-3",
+    "Ward-A",
+    "Ward-B"
+  ]
+} 

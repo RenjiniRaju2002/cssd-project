@@ -1,0 +1,50 @@
+{
+  "workflowItems": [
+    {
+      "id": "WF001",
+      "requestId": "REQ001",
+      "currentStatus": "Requested",
+      "timestamp": "2024-06-10T10:00:00.000Z",
+      "location": "Request Queue",
+      "department": "OR-1",
+      "items": "Surgery Kit",
+      "priority": "High"
+    },
+    {
+      "id": "WF002", 
+      "requestId": "REQ002",
+      "currentStatus": "Processing",
+      "timestamp": "2024-06-10T11:00:00.000Z",
+      "location": "Sterilization Area",
+      "department": "OR-2",
+      "items": "Instruments",
+      "priority": "Medium"
+    },
+    {
+      "id": "WF003",
+      "requestId": "REQ003", 
+      "currentStatus": "Completed",
+      "timestamp": "2024-06-09T15:00:00.000Z",
+      "location": "Completed",
+      "department": "ICU",
+      "items": "Basic Kit",
+      "priority": "Low"
+    }
+  ],
+  "statuses": [
+    "Requested",
+    "Processing", 
+    "In Sterilization",
+    "Completed",
+    "Cancelled",
+    "On Hold"
+  ],
+  "locations": [
+    "Request Queue",
+    "Processing Area",
+    "Sterilization Area", 
+    "Quality Check",
+    "Completed",
+    "Cancelled"
+  ]
+} 

@@ -9,6 +9,7 @@ import { Play, Pause, Square, Timer, Activity, AlertCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast";
 import Header from "./Header";
 import Footer from "./Footer";
+import initialData from "../../data/sterilizationProcessData.json";
 
 
 const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
@@ -52,19 +53,8 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
   const [isRunning, setIsRunning] = useState(false);
   const { toast } = useToast();
 
-  const [machines, setMachines] = useState([
-    { id: "autoclave-1", name: "Autoclave-1", status: "Available" },
-    { id: "autoclave-2", name: "Autoclave-2", status: "In Use" },
-    { id: "autoclave-3", name: "Autoclave-3", status: "Maintenance" },
-    { id: "chemical-1", name: "Chemical Sterilizer-1", status: "Available" },
-  ]);
-
-  const sterilizationMethods = [
-    { id: "steam", name: "Steam Sterilization", duration: 45, temp: "121°C" },
-    { id: "chemical", name: "Chemical Sterilization", duration: 75, temp: "Room Temp" },
-    { id: "plasma", name: "Plasma Sterilization", duration: 60, temp: "50°C" },
-    { id: "ethylene", name: "Ethylene Oxide", duration: 180, temp: "55°C" },
-  ];
+  const [machines, setMachines] = useState(initialData.machines);
+  const sterilizationMethods = initialData.sterilizationMethods;
 
   const startSterilization = (event: React.FormEvent) => {
     event.preventDefault();
@@ -232,7 +222,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
+    <div className="space-y-4 sm:space-y-5 bg-[#d9e0e7] min-h-screen p-2 sm:p-2">
        <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm">
       <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sterilization Process</h1>
@@ -470,8 +460,8 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
       </div>
-    </div>
     <Footer />
+    </div>
     </>
   );
 };

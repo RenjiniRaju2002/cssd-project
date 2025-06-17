@@ -7,17 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Plus, Package, Edit, Trash2, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Header from "./Header";
-import Footer from "./Footer";  
+import Footer from "./Footer";
+import initialData from "../../data/stockManagementData.json";
 
 
 const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
   const [stockItems, setStockItems] = useState(() => {
     const savedItems = localStorage.getItem('stockItems');
-    return savedItems ? JSON.parse(savedItems) : [
-      { id: "STK001", name: "Surgery Kit", category: "Reusable", quantity: 25, location: "Storage A", minLevel: 10, status: "In Stock" },
-      { id: "STK002", name: "Forceps", category: "Reusable", quantity: 15, location: "Storage B", minLevel: 5, status: "Low Stock" },
-      { id: "STK003", name: "Gauze", category: "Non-Reusable", quantity: 100, location: "Storage C", minLevel: 20, status: "In Stock" }
-    ];
+    return savedItems ? JSON.parse(savedItems) : initialData.stockItems;
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [editingItem, setEditingItem] = useState(null);
@@ -143,7 +140,7 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
+    <div className="space-y-4 sm:space-y-5 bg-[#d9e0e7] min-h-screen p-2 sm:p-2">
        <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h1 className="text-3xl font-bold text-gray-900">Stock Management</h1>
@@ -383,9 +380,9 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
-    <Footer />
-    </>
+     </>
   );
 };
 

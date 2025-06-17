@@ -11,33 +11,22 @@ import { Search, Eye, CheckCircle, Clock, XCircle, Plus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Header from "./Header";
 import Footer from "./Footer";
+import initialData from "../../data/receiveItemsData.json";
 
 const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
   const navigate = useNavigate();
   const [receivedItems, setReceivedItems] = useState(() => {
     const savedItems = localStorage.getItem('receivedItems');
     try {
-      return savedItems ? JSON.parse(savedItems) : [
-        { id: "REC001", requestId: "REQ001", department: "Surgery", items: "Surgical Tools", quantity: 5, receivedQty: 5, status: "Complete", date: "2024-06-10", time: "12:00" },
-        { id: "REC002", requestId: "REQ002", department: "ICU", items: "Medical Tools", quantity: 4, receivedQty: 4, status: "Complete", date: "2024-06-10", time: "13:00" },
-        { id: "REC003", requestId: "REQ003", department: "ICU", items: "Medical Tools", quantity: 4, receivedQty: 0, status: "Pending", date: "2024-06-10", time: "12:00" }
-      ];
+      return savedItems ? JSON.parse(savedItems) : initialData.receivedItems;
     } catch (error) {
       console.error('Error loading received items:', error);
-      return [
-        { id: "REC001", requestId: "REQ001", department: "Surgery", items: "Surgical Tools", quantity: 5, receivedQty: 5, status: "Complete", date: "2024-06-10", time: "12:00" },
-        { id: "REC002", requestId: "REQ002", department: "ICU", items: "Medical Tools", quantity: 4, receivedQty: 4, status: "Complete", date: "2024-06-10", time: "13:00" },
-        { id: "REC003", requestId: "REQ003", department: "ICU", items: "Medical Tools", quantity: 4, receivedQty: 0, status: "Pending", date: "2024-06-10", time: "12:00" }
-      ];
+      return initialData.receivedItems;
     }
   });
   const [workflowItems, setWorkflowItems] = useState(() => {
     const savedWorkflowItems = localStorage.getItem('workflowItems');
-    return savedWorkflowItems ? JSON.parse(savedWorkflowItems) : [
-      { requestId: "REQ001", currentStatus: "Ordered", timestamp: "2024-06-09T14:30:00.000Z", location: "Warehouse" },
-      { requestId: "REQ002", currentStatus: "Shipped", timestamp: "2024-06-09T16:00:00.000Z", location: "In Transit" },
-      { requestId: "REQ003", currentStatus: "Ordered", timestamp: "2024-06-09T10:00:00.000Z", location: "Warehouse" }
-    ];
+    return savedWorkflowItems ? JSON.parse(savedWorkflowItems) : initialData.workflowItems;
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -177,7 +166,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-4 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
+    <div className="space-y-4 sm:space-y-5 bg-[#d9e0e7] min-h-screen p-2 sm:p-2">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold"></h1>
         
@@ -438,8 +427,8 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
       </div>
-    </div>
     <Footer />
+    </div>
     </>
   );
 };

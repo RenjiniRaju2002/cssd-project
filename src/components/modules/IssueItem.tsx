@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Send, Clock, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Header from "./Header";
-import Footer from "./Footer";  
+import Footer from "./Footer";
+import initialData from "../../data/issueItemData.json";
 
 const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
   const [issuedItems, setIssuedItems] = useState(() => {
@@ -29,11 +30,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
     localStorage.setItem('issuedItems', JSON.stringify(issuedItems));
   }, [issuedItems]);
 
-  const availableItems = [
-    { id: "REQ001", department: "OR-1", items: "Surgery Kit", quantity: 2, status: "Sterilized", readyTime: "14:00" },
-    { id: "REQ003", department: "ICU", items: "Medical Tools", quantity: 4, status: "Sterilized", readyTime: "13:30" },
-    { id: "REQ004", department: "OR-3", items: "Emergency Kit", quantity: 1, status: "Sterilized", readyTime: "15:00" }
-  ];
+  const availableItems = initialData.availableItems;
 
   const handleIssueItem = (event: React.FormEvent) => {
     event.preventDefault();
@@ -72,7 +69,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-6 bg-[#d9e0e7] min-h-screen p-6">
+    <div className="space-y-4 sm:space-y-5 bg-[#d9e0e7] min-h-screen p-2 sm:p-2">
       
 
       <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm p-6">
@@ -279,8 +276,8 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
       </div>
-    </div>
     <Footer />
+    </div>
     </>
   );
 };

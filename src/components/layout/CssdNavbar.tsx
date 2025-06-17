@@ -171,7 +171,7 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
   });
 
   return (
-    <div className="header-container">
+    <div className="header-container mt-8">
       <SidebarTrigger />
       <h1></h1>
       <div className="header-div">
@@ -255,10 +255,10 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
                       key={item.id}
                       onClick={() => navigate(item.path)}
                       className={cn(
-                        "px-3 py-2 text-sm font-medium transition-colors",
+                        "px-3 py-2 text-sm font-medium transition-colors hover:bg-[#038ba4] hover:text-white",
                         window.location.pathname === item.path
                           ? "text-[#038ba4] bg-[#038ba4]/10"
-                          : "text-gray-700 hover:bg-[#038ba4]/10 hover:text-[#038ba4]"
+                          : "text-gray-700"
                       )}
                     >
                       {item.label}
@@ -313,7 +313,7 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
             {/* New Register Button */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="ml-7 flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#038ba4] hover:[#038ba4] rounded-md transition-colors">
+                <button className="ml-7 flex items-center gap-2 px-4 py-2 text-sm font-medium text-white btn-with-gradient rounded-md transition-colors">
                   <Plus className="w-4 h-4" />
                   New Request
                 </button>
@@ -377,8 +377,8 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
                   </Avatar>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 bg-white border border-gray-200 shadow-lg max-h-96 overflow-y-auto">
-                <DropdownMenuLabel className="text-[#038ba4]">
+              <DropdownMenuContent align="end" className="w-80 bg-white border border-gray-200 shadow-lg max-h-96 overflow-y-auto text-black">
+                <DropdownMenuLabel className="text-black">
                   {currentProfile ? `Request ${currentProfile.id}` : 'Select Profile'}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -386,7 +386,7 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
                 {!currentProfile && allProfiles.slice(0, 8).map((profile, index) => (
                   <DropdownMenuItem 
                     key={index}
-                    className="flex items-center gap-2 p-2 hover:bg-[#038ba4]/10 cursor-pointer"
+                    className="flex items-center gap-2 p-2 hover:bg-[#038ba4]/10 cursor-pointer text-black"
                     onClick={() => handleProfileSelect(profile)}
                   >
                     <Avatar className="w-6 h-6">
@@ -395,8 +395,8 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-medium text-sm text-[#038ba4]">ID: {profile.id}</div>
-                      <div className="text-xs text-gray-500">{profile.type} record</div>
+                      <div className="font-medium text-sm text-black">ID: {profile.id}</div>
+                      <div className="text-xs text-black">{profile.type} record</div>
                     </div>
                   </DropdownMenuItem>
                 ))}
@@ -404,7 +404,7 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
                 {currentProfile && (
                   <>
                     <DropdownMenuItem 
-                      className="flex items-center gap-2 p-2 hover:bg-[#038ba4]/10 cursor-pointer text-[#038ba4]"
+                      className="flex items-center gap-2 p-2 hover:bg-[#038ba4]/10 cursor-pointer text-black"
                       onClick={() => navigate(currentProfile.type === 'request' ? '/request-management' : 
                                             currentProfile.type === 'received' ? '/receive-items' : '/issue-item')}
                     >
@@ -412,25 +412,25 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      className="hover:bg-[#b2e4f1] hover:text-black cursor-pointer"
-                      onClick={() => handleNavigation('/profile')}
+                      className="hover:bg-[#b2e4f1] hover:text-black cursor-pointer text-black"
+                      onClick={() => navigate('/profile')}
                     >
-                      <User className="w-4 h-4 mr-2" />
+                      <User className="w-4 h-4 mr-2 text-black" />
                       Profile
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="hover:bg-[#b2e4f1] hover:text-black cursor-pointer"
-                      onClick={() => handleNavigation('/settings')}
+                      className="hover:bg-[#b2e4f1] hover:text-black cursor-pointer text-black"
+                      onClick={() => navigate('/settings')}
                     >
-                      <Settings className="w-4 h-4 mr-2" />
+                      <Settings className="w-4 h-4 mr-2 text-black" />
                       Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      className="hover:bg-red-100 hover:text-red-600 cursor-pointer"
+                      className="hover:bg-red-100 hover:text-red-600 cursor-pointer text-black"
                       onClick={handleLogout}
                     >
-                      <LogOut className="w-4 h-4 mr-2" />
+                      <LogOut className="w-4 h-4 mr-2 text-black" />
                       Logout
                     </DropdownMenuItem>
                   </>
@@ -445,31 +445,46 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
                   <Settings className="w-5 h-5" />
                 </button>
           </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-white border border-gray-200 shadow-lg">
-                <DropdownMenuLabel className="text-[#038ba4]">Settings</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleSettingsClick("dashboard")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4]">
+              <DropdownMenuContent align="end" className="w-56 bg-white border border-gray-200 shadow-lg text-black">
+                <DropdownMenuLabel className="text-black">Settings</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {/* Change Profile Picture Option */}
+                <DropdownMenuItem asChild className="hover:bg-[#038ba4]/10 hover:text-[#038ba4] cursor-pointer text-black">
+                  <label htmlFor="profile-picture-upload" className="w-full flex items-center cursor-pointer text-black">
+                    <User className="w-4 h-4 mr-2 text-black" />
+                    Change Profile Picture
+                    <input
+                      id="profile-picture-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={() => { /* handle image upload here if needed */ }}
+                    />
+                  </label>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleSettingsClick("dashboard")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4] text-black">
                   Dashboard Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSettingsClick("request-management")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4]">
+                <DropdownMenuItem onClick={() => handleSettingsClick("request-management")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4] text-black">
                   Request Management Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSettingsClick("receive-items")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4]">
+                <DropdownMenuItem onClick={() => handleSettingsClick("receive-items")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4] text-black">
                   Receive Items Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSettingsClick("issue-items")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4]">
+                <DropdownMenuItem onClick={() => handleSettingsClick("issue-items")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4] text-black">
                   Issue Items Settings
                 </DropdownMenuItem>
-            <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleSettingsClick("user-management")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4]">
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleSettingsClick("user-management")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4] text-black">
                   User Management
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSettingsClick("system")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4]">
+                <DropdownMenuItem onClick={() => handleSettingsClick("system")} className="hover:bg-[#038ba4]/10 hover:text-[#038ba4] text-black">
                   System Settings
                 </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </nav>
     </div>

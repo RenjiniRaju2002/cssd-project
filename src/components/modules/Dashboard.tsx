@@ -89,7 +89,7 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-6 bg-[#d9e0e7] min-h-screen p-4 sm:p-6">
+    <div className="space-y-4 sm:space-y-5 bg-[#d9e0e7] min-h-screen p-2 sm:p-2 ">
   
       
       <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm p-4 sm:p-6">
