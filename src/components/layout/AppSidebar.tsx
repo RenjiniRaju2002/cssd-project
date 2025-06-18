@@ -88,23 +88,28 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="bg-black fixed h-screen border-r border-gray-800 mt-20" data-state={state}>
+    <Sidebar className="bg-black fixed h-screen border-r border-gray-800 mt-10" data-state={state}>
       <SidebarHeader className="p-4 border-b border-gray-800">
         {/* Profile Section */}
-        <div className="flex items-center mb-6 mt-2">
-          <Avatar className="w-12 h-12">
+        <div className="flex items-center mb-2 mt-2">
+          <Avatar className="w-16 h-16 border-2 border-[#038ba4] rounded-full shadow-sm">
             {/* Set default Christmas profile image */}
-            <AvatarImage src="src\components\layout\proimg.png" alt="Profile" />
-            <AvatarFallback>SA</AvatarFallback>
+            <AvatarImage src="src\components\layout\proimg.png" alt="Profile"  />
+           
           </Avatar>
-          <div className="ml-4 text-left">
-            <div className="text-white font-semibold text-base leading-tight">system admin</div>
-            <div className="text-sm text-[#038ba4] leading-tight">HODO Hospital, Kazhakkottam</div>
-            <div className="text-xs text-[#038ba4] leading-tight">System Admin</div>
+          <div className="ml-4 text-center flex flex-col gap-1 ">
+            <div className="text-white font-bold text-lg leading-tight text-xs">System Admin</div>
+            <div className="text-xm text-[#038ba4] leading-tight font-semibold">HODO Hospital, Kazhakkottam</div>
+            <div className="text-xs text-white leading-tight">System Admin</div>
+            
           </div>
         </div>
+        
         {/* Search Section */}
-        <div className="relative mt-2">
+        <div className="relative">
+            <div className="sidebar-date mt-1 text-center">
+              <h6 className="text-xs text-white  leading-tight font-bold">@Anchal {new Date().toLocaleDateString()}</h6>
+            </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
@@ -128,7 +133,7 @@ export function AppSidebar() {
                     <SidebarMenuButton 
                       asChild 
                       isActive={location.pathname === item.url}
-                      className="hover:bg-[#b2e4f1] text-gray-300 hover:text-black data-[active=true]:bg-[#038ba4] data-[active=true]:text-white"
+                      className="hover:bg-[#b2e4f1] text-white hover:text-black data-[active=true]:bg-[#80def7] hover:border-r-4 hover:border-[#0d92ae] data-[active=true]:border-r-4 data-[active=true]:border-[#0d92ae] data-[active=true]:text-white rounded-none"
                     >
                       <Link to={item.url} className="flex items-center gap-3 px-4 py-2">
                         <FontAwesomeIcon icon={item.icon} className="w-4 h-4" />

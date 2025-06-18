@@ -73,7 +73,7 @@ const WorkflowTracking = () => {
         <p className="text-gray-600">Track items through the CSSD process</p>
       </div>
 
-      <Card className="bg-white shadow-sm">
+      <Card className="main-card">
         <CardHeader className="border-b border-gray-200">
           <CardTitle className="flex items-center gap-2 text-gray-900">
             <Search className="w-5 h-5 text-[#00A8E8]" />

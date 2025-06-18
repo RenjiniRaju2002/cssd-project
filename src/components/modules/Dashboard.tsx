@@ -89,11 +89,11 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-5 bg-[#d9e0e7] min-h-screen p-2 sm:p-2 ">
+    <div className="space-y-4 sm:space-y-5 bg-[white] min-h-40 p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0 ">
   
       
-      <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm p-4 sm:p-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+      <div className=" bg-white shadow-sm p-4 sm:p-4  border-l-4 border-[#038ba4]">
+        <h2 className="text-xl sm:text-xl  font-bold text-gray-900 "style={{color:"#038ba4"}}>Dashboard</h2>
         <p className="text-sm sm:text-base text-gray-600 mt-1">Central Sterile Service Department</p>
       </div>
       
@@ -195,9 +195,9 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
         </div>
-        <Footer />
 
     </div>
+        <Footer />
 
     </>
   );

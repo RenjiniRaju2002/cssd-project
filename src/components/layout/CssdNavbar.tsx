@@ -172,35 +172,37 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
 
   return (
     <div className="header-container mt-8">
-      <SidebarTrigger />
+      {/* <SidebarTrigger /> */}
       <h1></h1>
-      <div className="header-div">
+      {/* <div className="header-div">
         <div className="icons-div">
           <div className="icon-item">
-            <Calendar size={25} className="header-icon" />
+            <Calendar size={25} className="header-icon text-white" />
             <span className="header-span">{currentDate}</span>
           </div>
           <div className="icon-item">
-            <Clock size={25} className="header-icon" />
+            <Clock size={25} className="header-icon text-white" />
             <span className="header-span">{formattedTime}</span>
           </div>
           <div className="icon-item">
-            <Calculator size={25} className="header-icon" />
+            <Calculator size={25} className="header-icon text-white" />
           </div>
         </div>
-      </div>
+      </div> */}
       <nav className="bg-black border-b border-gray-800 w-full fixed top-0 left-0 z-50 shadow-lg">
-        <div className="flex items-center justify-between h-20 px-8">
+        <div className="flex items-center justify-between h-19 px-8 py-1">
           {/* Left side - Logo and navigation */}
           <div className="flex items-center gap-6">
             {/* Logo */}
             
-            <div className="flex items-center gap-3">
+            <div className=" gap-2">
+          <a href="/">
           <img 
             src="https://hodo.in/wp-content/uploads/2022/05/cropped-HODO-Fav.png" 
             alt="HODO Logo" 
             className="h-12 w-auto"
           />
+          </a>
          </div>
            
             
@@ -213,7 +215,7 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
                   className={cn(
                     "px-4 py-2 text-sm font-medium transition-colors",
                     window.location.pathname === item.path
-                      ? "text-[#038ba4] border-b-2 border-[#038ba4]"
+                      ? "text-gray-300"
                       : "text-gray-300 hover:text-[#038ba4]"
                   )}
                 >
@@ -308,14 +310,14 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
             )}
           </div>
           
-          {/* Right side - New Register, Notifications, Profile, Settings */}
+          {/* Right side - New Sale, Notifications, Profile, Settings */}
           <div className="flex items-center gap-2">
-            {/* New Register Button */}
+            {/* New Sale Button */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="ml-7 flex items-center gap-2 px-4 py-2 text-sm font-medium text-white btn-with-gradient rounded-md transition-colors">
                   <Plus className="w-4 h-4" />
-                  New Request
+                  New Sale
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-white border border-gray-200 shadow-lg">
@@ -331,11 +333,23 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Add Patient Button */}
+            <button className="ml-2 flex items-center gap-2 px-4 py-2 text-sm font-medium text-white btn-with-gradient rounded-md transition-colors" onClick={() => navigate('/add-patient')}>
+              + Add Patient
+            </button>
+
+            {/* Search Icon Button */}
+            <button className="ml-2 p-2 rounded-md bg-black hover:bg-[#038ba4] hover:text-black text-[#038ba4] transition-colors  flex items-center justify-center" style={{ height: '40px', width: '40px' }}>
+              {/* <Search className="w-5 h-5 text-white" /> */}
+              <i className="fas fa-search mt-1 text-white"></i>
+            </button>
+
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="p-2 text-gray-300 hover:text-white transition-colors relative">
-          <Bell className="w-5 h-5" />
+          {/* <Bell className="w-5 h-5 text-white" /> */}
+                  <i className="fas fa-bell mt-1 text-white"></i>
                   {notifications.length > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500">
                       {notifications.length}
@@ -366,83 +380,12 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Profile */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="p-2 text-gray-300 hover:text-white transition-colors">
-                  <Avatar className="w-6 h-6">
-                    <AvatarFallback className="bg-[#038ba4] text-white text-xs">
-                      {currentProfile ? currentProfile.id?.[0] : <User className="w-3 h-3" />}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 bg-white border border-gray-200 shadow-lg max-h-96 overflow-y-auto text-black">
-                <DropdownMenuLabel className="text-black">
-                  {currentProfile ? `Request ${currentProfile.id}` : 'Select Profile'}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                
-                {!currentProfile && allProfiles.slice(0, 8).map((profile, index) => (
-                  <DropdownMenuItem 
-                    key={index}
-                    className="flex items-center gap-2 p-2 hover:bg-[#038ba4]/10 cursor-pointer text-black"
-                    onClick={() => handleProfileSelect(profile)}
-                  >
-                    <Avatar className="w-6 h-6">
-                      <AvatarFallback className="bg-[#038ba4] text-white text-xs">
-                        {profile.id?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium text-sm text-black">ID: {profile.id}</div>
-                      <div className="text-xs text-black">{profile.type} record</div>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-                
-                {currentProfile && (
-                  <>
-                    <DropdownMenuItem 
-                      className="flex items-center gap-2 p-2 hover:bg-[#038ba4]/10 cursor-pointer text-black"
-                      onClick={() => navigate(currentProfile.type === 'request' ? '/request-management' : 
-                                            currentProfile.type === 'received' ? '/receive-items' : '/issue-item')}
-                    >
-                      View Details
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="hover:bg-[#b2e4f1] hover:text-black cursor-pointer text-black"
-                      onClick={() => navigate('/profile')}
-                    >
-                      <User className="w-4 h-4 mr-2 text-black" />
-                      Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="hover:bg-[#b2e4f1] hover:text-black cursor-pointer text-black"
-                      onClick={() => navigate('/settings')}
-                    >
-                      <Settings className="w-4 h-4 mr-2 text-black" />
-                      Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="hover:bg-red-100 hover:text-red-600 cursor-pointer text-black"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="w-4 h-4 mr-2 text-black" />
-                      Logout
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             {/* Settings */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
                 <button className="p-2 text-gray-300 hover:text-white transition-colors">
-                  <Settings className="w-5 h-5" />
+                  {/* <Settings className="w-5 h-5 text-white" /> */}
+                  <i className="fas fa-cog  mt-1 text-white"></i>
                 </button>
           </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-white border border-gray-200 shadow-lg text-black">

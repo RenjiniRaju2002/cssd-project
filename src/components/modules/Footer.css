@@ -3,11 +3,15 @@
   justify-content: space-between;
   align-items: center;
   gap: 20px;
-  padding: 1rem;
+  padding: 0.1rem;
   background-color: #d9e0e7;
   font-family: 'Poppins', sans-serif;
   border: 1px solid white;
   border-radius: 4px;
+  margin-left: 37px;
+  margin-right: 37px;
+  margin-bottom: 10px;
+  margin-top: -20px;
 }
 
 .footer-left {

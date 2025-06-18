@@ -43,11 +43,11 @@ const Header: FC<HeaderProps> = ({ sidebarCollapsed, toggleSidebar }) => {
         {sidebarCollapsed ?<img src="http://192.168.50.210:8123/renjiniraju/static/img/righthand.png" alt="right move" /> : <img src="lefthand.png" alt="left move" />}
       </button>
       <h1></h1>
-      <div className="header-div ">
+      <div className="header-div">
         <div className="icons-div">
           <div className="icon-item">
             <Calendar size={25} className="header-icon" />
-            <span className="header-span">{currentDate}</span>
+            <span className="header-span ">{currentDate}</span>
           </div>
           <div className="icon-item">
             <Clock size={25} className="header-icon" />

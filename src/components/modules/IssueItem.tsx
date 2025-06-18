@@ -69,11 +69,11 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-5 bg-[#d9e0e7] min-h-screen p-2 sm:p-2">
+    <div className="space-y-4 sm:space-y-5 bg-[#ffffff] min-h-40 p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0 ">
       
 
-      <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-3xl font-bold text-gray-900">Issue Item</h1>
+      <div className="bg-white shadow-sm p-4 border-l-4 border-[#038ba4]">
+        <h1 className="text-xl font-bold text-gray-900" style={{color:"#038ba4"}}>Issue Item</h1>
         <p className="text-gray-600">Issue sterilized items to departments and outlets</p>
       </div>
 
@@ -183,7 +183,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
       <Card className="bg-white shadow-sm border-0">
         <CardHeader className="border-b border-gray-200">
           <CardTitle className="flex items-center gap-2 text-gray-900">
-            <Clock className="w-5 h-5 text-[#00A8E8]" />
+            <Clock className="w-5 h-5 text-[#038ba4]" />
             Issue History
           </CardTitle>
           <div className="relative">
@@ -276,8 +276,8 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
       </div>
-    <Footer />
     </div>
+    <Footer />
     </>
   );
 };

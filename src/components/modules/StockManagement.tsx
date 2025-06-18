@@ -140,10 +140,10 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-5 bg-[#d9e0e7] min-h-screen p-2 sm:p-2">
-       <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm">
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-3xl font-bold text-gray-900">Stock Management</h1>
+    <div className="space-y-4 sm:space-y-5 bg-[#ffffff] min-h-40 p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0">
+       <div className="bg-white shadow-sm border-l-4 border-[#038ba4]">
+      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-4 border-0">
+        <h1 className="text-xl sm:text-xl font-bold text-gray-900" style={{color:"#038ba4"}}>Stock Management</h1>
         <p className="text-gray-600">Manage inventory items and stock levels</p>
       </div>
       </div>
@@ -380,8 +380,8 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
       </div>
-      <Footer />
     </div>
+      <Footer />
      </>
   );
 };

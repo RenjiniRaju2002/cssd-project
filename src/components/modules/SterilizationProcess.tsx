@@ -222,10 +222,10 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-5 bg-[#d9e0e7] min-h-screen p-2 sm:p-2">
-       <div className="border-t-4 border-[#038ba4] bg-white rounded-lg shadow-sm">
-      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border-0">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sterilization Process</h1>
+    <div className="space-y-4 sm:space-y-5 bg-[#ffffff] min-h-40 p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0">
+       <div className="bg-white  border-l-4 border-[#038ba4] shadow-sm">
+      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-4 border-0">
+        <h1 className="text-xl sm:text-xl font-bold text-gray-900" style={{color:"#038ba4"}}>Sterilization Process</h1>
         <p className="text-sm sm:text-base text-gray-600 mt-1">Manage sterilization cycles and monitor progress</p>
       </div>
       </div>
@@ -460,8 +460,8 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
       </div>
-    <Footer />
     </div>
+    <Footer />
     </>
   );
 };
