@@ -177,22 +177,22 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
       {/* <div className="header-div">
         <div className="icons-div">
           <div className="icon-item">
-            <Calendar size={25} className="header-icon text-white" />
+            <i className="header-icon fa-solid fa-calendar-days"></i>
             <span className="header-span">{currentDate}</span>
           </div>
           <div className="icon-item">
-            <Clock size={25} className="header-icon text-white" />
+            <i className="header-icon fa-solid fa-clock custom-clock"></i>
             <span className="header-span">{formattedTime}</span>
           </div>
           <div className="icon-item">
-            <Calculator size={25} className="header-icon text-white" />
+            <i className="header-icon fa-solid fa-calculator"></i>
           </div>
         </div>
       </div> */}
       <nav className="bg-black border-b border-gray-800 w-full fixed top-0 left-0 z-50 shadow-lg">
         <div className="flex items-center justify-between h-19 px-8 py-1">
           {/* Left side - Logo and navigation */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-1">
             {/* Logo */}
             
             <div className=" gap-2">
@@ -200,20 +200,20 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
           <img 
             src="https://hodo.in/wp-content/uploads/2022/05/cropped-HODO-Fav.png" 
             alt="HODO Logo" 
-            className="h-12 w-auto"
+            className="h-10 w-auto"
           />
           </a>
          </div>
            
             
             {/* Navigation items */}
-            <div className="flex items-center">
+            <div className="flex items-center" style={{fontSize: '12px',fontWeight:300}}>
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => navigate(item.path)}
                   className={cn(
-                    "px-4 py-2 text-sm font-medium transition-colors",
+                    "px-4 py-2 text-sm font-normal transition-colors",
                     window.location.pathname === item.path
                       ? "text-gray-300"
                       : "text-gray-300 hover:text-[#038ba4]"
@@ -235,20 +235,7 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
                     )}
                   >
                     More
-                    <svg
-                      className="w-4 h-4 ml-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
+                    <i className="fa-solid fa-caret-down ml-1"></i>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56 bg-white border border-gray-200 shadow-lg">
@@ -257,7 +244,7 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
                       key={item.id}
                       onClick={() => navigate(item.path)}
                       className={cn(
-                        "px-3 py-2 text-sm font-medium transition-colors hover:bg-[#038ba4] hover:text-white",
+                        "px-3 py-2 text-sm font-medium transition-colors hover:bg-[#0d92ae] hover:text-white",
                         window.location.pathname === item.path
                           ? "text-[#038ba4] bg-[#038ba4]/10"
                           : "text-gray-700"
@@ -315,8 +302,7 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
             {/* New Sale Button */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="ml-7 flex items-center gap-2 px-4 py-2 text-sm font-medium text-white btn-with-gradient rounded-md transition-colors">
-                  <Plus className="w-4 h-4" />
+                <button className="ml-7 flex items-center gap-2 px-4 py-2 text-sm font-normal text-white btn-with-gradient rounded-md transition-colors">
                   New Sale
                 </button>
               </DropdownMenuTrigger>
@@ -334,7 +320,7 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
             </DropdownMenu>
 
             {/* Add Patient Button */}
-            <button className="ml-2 flex items-center gap-2 px-4 py-2 text-sm font-medium text-white btn-with-gradient rounded-md transition-colors" onClick={() => navigate('/add-patient')}>
+            <button className="ml-2 flex items-center gap-2 px-4 py-2 text-sm font-normal text-white btn-with-gradient rounded-md transition-colors" onClick={() => navigate('/add-patient')}>
               + Add Patient
             </button>
 

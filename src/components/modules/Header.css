@@ -93,13 +93,17 @@
 }
 .header-span{
     color: #888888;
-    font-size: 14px;;
+    font-size: 14px;
+    font-weight: 700;
+    width: fit-content;
 }
 .header-icon{
     background-color: white;
     color: black !important;
-    padding: 6px;
-    border-radius: 4px;
+    font-size: 16px;
+    width: 26px;
+    padding: 5px;
+    border-radius: 7px;
 }
 
 .icon-item:hover {

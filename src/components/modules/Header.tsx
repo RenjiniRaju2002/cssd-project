@@ -46,15 +46,18 @@ const Header: FC<HeaderProps> = ({ sidebarCollapsed, toggleSidebar }) => {
       <div className="header-div">
         <div className="icons-div">
           <div className="icon-item">
-            <Calendar size={25} className="header-icon" />
+            {/* <Calendar size={25} className="header-icon" /> */}
+            <i className="header-icon fa-solid fa-calendar-days"></i>
             <span className="header-span ">{currentDate}</span>
           </div>
           <div className="icon-item">
-            <Clock size={25} className="header-icon" />
+            {/* <Clock size={25} className="header-icon" /> */}
+            <i className="header-icon fa-solid fa-clock custom-clock"></i>
             <span className="header-span">{formattedTime}</span>
           </div>
           <div className="icon-item">
-            <Calculator size={25} className="header-icon" />
+            {/* <Calculator size={25} className="header-icon" /> */}
+            <i className="header-icon fa-solid fa-calculator"></i>
             {/* <span>Calculator</span> */}
           </div>
         </div>

@@ -366,14 +366,14 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
     <div className="space-y-4 sm:space-y-5 bg-[#ffffff] min-h-40 p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0">
        <div className="bg-white  border-l-4 border-[#038ba4] shadow-sm">
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <h1 className="text-xl font-bold text-gray-900 "style={{color:"#038ba4"}}>Request Management</h1>
-        <p className="text-gray-600">Create and manage sterilization requests</p>
+        <h1 className="text-xl sm:text-xl font-bold text-gray-900" style={{color: "#038ba4"}}>Request Management</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Create and manage sterilization requests</p>
       </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
         <Card className="bg-white shadow-sm">
           <CardHeader className="border-b border-gray-200">
-            <CardTitle className="flex items-center gap-2 text-gray-900">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-gray-900 mb-4">
               <Plus className="w-5 h-5 text-[#038ba4]" />
               Create New Request
             </CardTitle>
@@ -449,9 +449,9 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-white shadow-sm text-xs">
           <CardHeader className="border-b border-gray-200">
-            <CardTitle className="flex items-center justify-between">
+            <CardTitle className="flex items-center justify-between text-lg sm:text-xl text-gray-900 mb-4">
               <span className="flex items-center gap-2 text-gray-900">
                 <Package className="w-5 h-5 text-[#038ba4]" />
                 Package Kits
@@ -577,7 +577,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
 
       <Card className="bg-white shadow-sm">
         <CardHeader className="border-b border-gray-200">
-          <CardTitle className="text-gray-900">Previous Requests</CardTitle>
+          <CardTitle className="text-lg sm:text-xl text-gray-900 mb-4">Previous Requests</CardTitle>
           <div className="flex gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -773,7 +773,6 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                   onValueChange={(value) => {
                     handleUpdateStatus(selectedRequest?.id || "", value);
                   }}
-                  className="w-full"
                 >
                   <SelectTrigger className="border-gray-300">
                     <SelectValue placeholder="Select new status" />

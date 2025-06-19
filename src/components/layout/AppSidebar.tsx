@@ -19,7 +19,6 @@ import {
   Database, 
   BarChart3,
   Building2,
-  Search,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -88,7 +87,11 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="bg-black fixed h-screen border-r border-gray-800 mt-10" data-state={state}>
+    <Sidebar
+      className="bg-black fixed h-screen border-r border-gray-800 mt-10"
+      style={{ width: "250px" }}
+      data-state={state}
+    >
       <SidebarHeader className="p-4 border-b border-gray-800">
         {/* Profile Section */}
         <div className="flex items-center mb-2 mt-2">
@@ -98,9 +101,10 @@ export function AppSidebar() {
            
           </Avatar>
           <div className="ml-4 text-center flex flex-col gap-1 ">
-            <div className="text-white font-bold text-lg leading-tight text-xs">System Admin</div>
-            <div className="text-xm text-[#038ba4] leading-tight font-semibold">HODO Hospital, Kazhakkottam</div>
-            <div className="text-xs text-white leading-tight">System Admin</div>
+            <div className="text-white font-bold text-lg leading-tight text-xs" style={{fontFamily: 'Geneva, Arial, Helvetica, sans-serif'}}>System Admin</div>
+            <div className="text-[#038ba4] leading-tight " style={{ fontFamily: 'Geneva, Arial, Helvetica, sans-serif', fontSize: '18px' }}
+            >HODO Hospital, Kazhakkottam</div>
+            <div className="text-xs text-[#038ba4] leading-tight" style={{fontFamily: 'Geneva, Arial, Helvetica, sans-serif'}}>System Admin</div>
             
           </div>
         </div>
@@ -111,19 +115,24 @@ export function AppSidebar() {
               <h6 className="text-xs text-white  leading-tight font-bold">@Anchal {new Date().toLocaleDateString()}</h6>
             </div>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
               type="text"
-              placeholder="Search components..."
+              placeholder="Search Menu- Ctrl + M"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10  text-white placeholder-gray-400  bg-black border-[#038ba4] focus:ring-[#038ba4]"
+              className="pl-2 text-white placeholder-gray-400 bg-black border-[#038ba4] focus:ring-[#038ba4] h-8"
             />
           </div>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
+          <div className=" w-100 mb-1 p-1 bg-[#80DEF7] hover:bg-[#b2e4f1] text-black data-[active=true]:bg-[#80def7] hover:border-r-4 hover:border-[#0d92ae] data-[active=true]:border-r-4 data-[active=true]:border-[#0d92ae] data-[active=true]:text-white">
+            <h2 className="ml-5 p-1 bg-[#80DEF7] hover:bg-[#b2e4f1] 
+            text-black data-[active=true]:bg-[#80def7]  
+            data-[active=true]:border-r-4 data-[active=true]:border-[#0d92ae]
+             data-[active=true]:text-white rounded-none" style={{fontSize: '12px',fontWeight:700}}>CSSD</h2>
+          </div>
           
           <SidebarGroupContent>
             <SidebarMenu>
@@ -137,7 +146,7 @@ export function AppSidebar() {
                     >
                       <Link to={item.url} className="flex items-center gap-3 px-4 py-2">
                         <FontAwesomeIcon icon={item.icon} className="w-4 h-4" />
-                        <span>{item.title}</span>
+                        <span style={{fontSize: '12px',fontWeight:300}}>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

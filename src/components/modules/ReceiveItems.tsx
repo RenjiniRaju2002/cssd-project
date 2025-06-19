@@ -167,10 +167,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
     <div className="space-y-4 sm:space-y-5 bg-[#ffffff] min-h-40 p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold"></h1>
-        
-      </div>
+     
       <div className="bg-white shadow-sm border-l-4 border-[#038ba4]">
       <div className="bg-white rounded-lg shadow-sm p-4">
       

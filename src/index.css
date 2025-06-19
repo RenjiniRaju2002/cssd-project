@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+html, body {
+  font-family: 'Poppins', sans-serif;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -47,7 +53,6 @@
     --sidebar-border: 17 17 17; /* Changed to darker black */
     --sidebar-ring: 3 139 164; /* Changed to #038ba4 */
 
-    font-family: 'Poppins', sans-serif;
     font-weight: 500;
   }
 }
@@ -97,6 +102,21 @@
   .btn-with-gradient:active {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Sidebar searchbar styles */
+  .searchbar {
+    margin: 0px 5px 0 auto;
+    padding: 8px 6px 8px 6px;
+    line-height: 17.5px;
+    width: 100%;
+    max-width: 95%;
+    background-color: #1f1f1f;
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset;
+    outline: none;
+    border: 1px solid rgb(128, 222, 247);
+    color: white !important;
   }
 
   /* Fixed navbar buttons - prevent movement on click */

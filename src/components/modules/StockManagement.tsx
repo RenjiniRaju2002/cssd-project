@@ -151,7 +151,7 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
       <Card className="bg-white shadow-sm">
         <CardHeader className="border-b border-gray-200">
           <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center gap-2 text-gray-900">
+            <CardTitle className="flex items-center gap-2 text-gray-900 text-xl">
               <Package className="w-5 h-5 text-[#038ba4]" />
               Inventory Management
             </CardTitle>
@@ -343,7 +343,7 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card className="bg-white shadow-sm">
           <CardHeader className="border-b border-gray-200">
-            <CardTitle className="flex items-center gap-2 text-blue-600">
+            <CardTitle className="flex items-center gap-2 text-blue-600 text-base">
               <Package className="w-5 h-5" />
               Total Items
             </CardTitle>
@@ -356,7 +356,7 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
 
         <Card className="bg-white shadow-sm">
           <CardHeader className="border-b border-gray-200">
-            <CardTitle className="flex items-center gap-2 text-orange-600">
+            <CardTitle className="flex items-center gap-2 text-orange-600 text-base">
               <Edit className="w-5 h-5" />
               Low Stock Items
             </CardTitle>
@@ -369,7 +369,7 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
 
         <Card className="bg-white shadow-sm">
           <CardHeader className="border-b border-gray-200">
-            <CardTitle className="flex items-center gap-2 text-green-600">
+            <CardTitle className="flex items-center gap-2 text-green-600 text-base">
               <Eye className="w-5 h-5" />
               Categories
             </CardTitle>
