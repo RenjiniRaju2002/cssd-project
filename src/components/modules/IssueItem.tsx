@@ -78,7 +78,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white shadow-sm border-0">
+        <Card className="bg-white shadow-lg border-0">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-gray-900 mb-4">
               <Send className="w-5 h-5 text-[#038ba4]" />
@@ -152,7 +152,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm border-0">
+        <Card className="bg-white shadow-lg border-0">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-gray-900 mb-4">
               <CheckCircle className="w-5 h-5 text-[#038ba4]" />
@@ -180,7 +180,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
         </Card>
       </div>
 
-      <Card className="bg-white shadow-sm border-0">
+      <Card className="bg-white shadow-lg border-0">
         <CardHeader className="border-b border-gray-200">
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-gray-900 mb-4">
             <Clock className="w-5 h-5 text-[#038ba4]" />
@@ -235,7 +235,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-white shadow-sm border-0">
+        <Card className="bg-white shadow-lg border-0">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-blue-600 text-base">
               <CheckCircle className="w-5 h-5" />
@@ -248,7 +248,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm border-0">
+        <Card className="bg-white shadow-lg border-0">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-green-600 text-base">
               <Send className="w-5 h-5" />
@@ -263,7 +263,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm border-0">
+        <Card className="bg-white shadow-lg border-0">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-purple-600 text-base">
               <Clock className="w-5 h-5" />

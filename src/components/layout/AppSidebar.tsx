@@ -131,11 +131,10 @@ export function AppSidebar() {
             <h2 className="ml-5 p-1 bg-[#80DEF7] hover:bg-[#b2e4f1] 
             text-black data-[active=true]:bg-[#80def7]  
             data-[active=true]:border-r-4 data-[active=true]:border-[#0d92ae]
-             data-[active=true]:text-white rounded-none" style={{fontSize: '12px',fontWeight:700}}>CSSD</h2>
+            data-[active=true]:text-white rounded-none " style={{fontSize:'12px',fontWeight:500}}>Central Sterile Services</h2>
           </div>
-          
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu> 
               {filteredMenuItems.length > 0 ? (
                 filteredMenuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>

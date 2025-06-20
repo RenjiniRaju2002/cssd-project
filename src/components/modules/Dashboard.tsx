@@ -4,15 +4,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
+import { useDashboardStats, useInitializeData } from "@/hooks/use-cssd-api";
 
 const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
   const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    activeRequests: 0,
-    sterilizationInProgress: 0,
-    itemsReady: 0,
-    lowStockItems: 0
-  });
+  const { stats, loading, error, refetch } = useDashboardStats();
+  const { initializeData } = useInitializeData();
 
   const [currentTime, setCurrentTime] = useState(new Date());
   useEffect(() => {
@@ -20,63 +17,10 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
     return () => clearInterval(timer);
   }, []);
 
+  // Initialize sample data on first load
   useEffect(() => {
-    // Load counts from localStorage
-    const loadCounts = () => {
-      try {
-        // Load from RequestManagement
-        const requests = localStorage.getItem('cssdRequests');
-        const parsedRequests = requests ? JSON.parse(requests) : [];
-        const activeRequests = parsedRequests.filter(req => req.status !== "Completed").length;
-
-        // Load from SterilizationProcess
-        const processes = localStorage.getItem('sterilizationProcesses');
-        const parsedProcesses = processes ? JSON.parse(processes) : [];
-        const sterilizationInProgress = parsedProcesses.filter(proc => proc.status === "In Progress").length;
-
-        // Load from IssueItem (issuedItems)
-        const issuedItems = localStorage.getItem('issuedItems');
-        const parsedIssued = issuedItems ? JSON.parse(issuedItems) : [];
-        const itemsReady = parsedIssued.filter(item => item.status === "Ready").length;
-
-        // Load from StockManagement
-        const stockItems = localStorage.getItem('stockItems');
-        const parsedStock = stockItems ? JSON.parse(stockItems) : [];
-        const lowStockItems = parsedStock.filter(item => item.status === "Low Stock").length;
-
-        setStats({
-          activeRequests,
-          sterilizationInProgress,
-          itemsReady,
-          lowStockItems
-        });
-      } catch (error) {
-        console.error('Error loading dashboard stats:', error);
-        setStats({
-          activeRequests: 0,
-          sterilizationInProgress: 0,
-          itemsReady: 0,
-          lowStockItems: 0
-        });
-      }
-    };
-
-    // Load initial counts
-    loadCounts();
-
-    // Create observer for localStorage changes
-    const observer = new MutationObserver(() => {
-      loadCounts();
-    });
-
-    // Start observing localStorage
-    observer.observe(document, { subtree: true, childList: true });
-
-    // Cleanup on unmount
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
+    initializeData();
+  }, [initializeData]);
 
   const handleNewRequest = () => {
     navigate('/request-management');
@@ -85,6 +29,38 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
   const handleStartSterilization = () => {
     navigate('/sterilization-process');
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <>
+        <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+        <div className="space-y-4 sm:space-y-5 bg-[white] min-h-40 p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0">
+          <div className="bg-white shadow-sm p-4 sm:p-4 border-l-4 border-[#038ba4]">
+            <h2 className="text-xl sm:text-xl font-bold text-gray-900" style={{color:"#038ba4"}}>Dashboard</h2>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">Loading...</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <>
+        <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+        <div className="space-y-4 sm:space-y-5 bg-[white] min-h-40 p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0">
+          <div className="bg-white shadow-sm p-4 sm:p-4 border-l-4 border-[#038ba4]">
+            <h2 className="text-xl sm:text-xl font-bold text-gray-900" style={{color:"#038ba4"}}>Dashboard</h2>
+            <p className="text-sm sm:text-base text-red-600 mt-1">Error: {error}</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -98,7 +74,7 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+        <Card className="bg-white shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium text-gray-900">Active Requests</CardTitle>
             <Package className="h-4 w-4 text-blue-600" />
@@ -109,7 +85,7 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+        <Card className="bg-white shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium text-gray-900">Sterilization In Progress</CardTitle>
             <Activity className="h-4 w-4 text-green-600" />
@@ -120,7 +96,7 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+        <Card className="bg-white shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium text-gray-900">Items Ready</CardTitle>
             <Clock className="h-4 w-4 text-purple-600" />
@@ -131,7 +107,7 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+        <Card className="bg-white shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium text-gray-900">Low Stock Items</CardTitle>
             <AlertTriangle className="h-4 w-4 text-yellow-600" />
@@ -144,9 +120,9 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-white shadow-lg">
           <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
-            <CardTitle className="text-lg sm:text-xl text-gray-900">Recent Activity</CardTitle>
+            <CardTitle className="text-lg sm:text-xm text-gray-900">Recent Activity</CardTitle>
             <CardDescription className="text-sm text-gray-600">Latest CSSD operations</CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
@@ -169,9 +145,9 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-white shadow-lg">
           <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
-            <CardTitle className="text-lg sm:text-xl text-gray-900">Quick Actions</CardTitle>
+            <CardTitle className="text-lg sm:text-xm text-gray-900">Quick Actions</CardTitle>
             <CardDescription className="text-sm text-gray-600">Common CSSD tasks</CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">

@@ -371,7 +371,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
       </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-white shadow-lg">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-gray-900 mb-4">
               <Plus className="w-5 h-5 text-[#038ba4]" />
@@ -449,7 +449,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm text-xs">
+        <Card className="bg-white shadow-lg text-xs">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center justify-between text-lg sm:text-xl text-gray-900 mb-4">
               <span className="flex items-center gap-2 text-gray-900">
@@ -575,7 +575,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
         </Card>
       </div>
 
-      <Card className="bg-white shadow-sm">
+      <Card className="bg-white shadow-lg">
         <CardHeader className="border-b border-gray-200">
           <CardTitle className="text-lg sm:text-xl text-gray-900 mb-4">Previous Requests</CardTitle>
           <div className="flex gap-4">

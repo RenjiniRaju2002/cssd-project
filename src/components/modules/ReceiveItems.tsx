@@ -220,7 +220,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
       </div>
       </div>
 
-      <Card className="bg-white shadow-sm">
+      <Card className="bg-white shadow-lg">
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
           <CardTitle className="text-lg sm:text-xl text-gray-900 mb-4">Received Items Management</CardTitle>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -379,7 +379,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
       </Dialog>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-white shadow-lg">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-green-600 text-base">
               <CheckCircle className="w-5 h-5" />
@@ -394,7 +394,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-white shadow-lg">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-yellow-600 text-base">
               <Clock className="w-5 h-5" />
@@ -409,7 +409,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-white shadow-lg">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-red-600 text-base">
               <XCircle className="w-5 h-5" />
