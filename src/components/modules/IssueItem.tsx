@@ -69,7 +69,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-5 bg-[#ffffff] min-h-40 p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0 ">
+    <div className="space-y-4 sm:space-y-5 bg-[#ffffff] min-h-screen p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0 ">
       
 
       <div className="bg-white shadow-sm p-4 border-l-4 border-[#038ba4]">

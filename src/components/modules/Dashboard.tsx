@@ -65,7 +65,7 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-5 bg-[white] min-h-40 p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0 ">
+    <div className="space-y-4 sm:space-y-5 bg-[white] min-h-screen p-1 sm:p-5 border-t-4 border-[#038ba4] m-8 mt-0  ">
   
       
       <div className=" bg-white shadow-sm p-4 sm:p-4  border-l-4 border-[#038ba4]">
@@ -73,7 +73,7 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
         <p className="text-sm sm:text-base text-gray-600 mt-1">Central Sterile Service Department</p>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-4 gap-4">
         <Card className="bg-white shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium text-gray-900">Active Requests</CardTitle>
