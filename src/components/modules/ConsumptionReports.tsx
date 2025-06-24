@@ -446,7 +446,7 @@ ${filteredData.map(item =>
 
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-blue-600 text-base">
               <BarChart3 className="w-5 h-5" />
@@ -459,7 +459,7 @@ ${filteredData.map(item =>
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-green-600 text-base">
               <TrendingUp className="w-5 h-5" />
@@ -472,7 +472,7 @@ ${filteredData.map(item =>
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-purple-600 text-base">
               <BarChart3 className="w-5 h-5" />
@@ -487,7 +487,7 @@ ${filteredData.map(item =>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
             <CardTitle className="text-lg text-gray-900">Weekly Consumption Trend</CardTitle>
           </CardHeader>
@@ -505,7 +505,7 @@ ${filteredData.map(item =>
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
             <CardTitle className="text-lg text-gray-900">Outlet-wise Consumption</CardTitle>
           </CardHeader>
@@ -523,7 +523,7 @@ ${filteredData.map(item =>
         </Card>
       </div>
 
-      <Card className="bg-white shadow-lg">
+      <Card className="bg-white border border-gray-200">
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
           <div className="flex justify-between items-center">
             <CardTitle className="text-lg text-gray-900">Surgery Item Consumption Details</CardTitle>

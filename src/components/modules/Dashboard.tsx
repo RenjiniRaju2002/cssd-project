@@ -73,54 +73,27 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
         <p className="text-sm sm:text-base text-gray-600 mt-1">Central Sterile Service Department</p>
       </div>
       
-      <div className="grid grid-cols-4 gap-4">
-        <Card className="bg-white shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium text-gray-900">Active Requests</CardTitle>
-            <Package className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.activeRequests}</div>
-            <p className="text-xs text-gray-600">Pending processing</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium text-gray-900">Sterilization In Progress</CardTitle>
-            <Activity className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.sterilizationInProgress}</div>
-            <p className="text-xs text-gray-600">Currently processing</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium text-gray-900">Items Ready</CardTitle>
-            <Clock className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.itemsReady}</div>
-            <p className="text-xs text-gray-600">Ready for issue</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium text-gray-900">Low Stock Items</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.lowStockItems}</div>
-            <p className="text-xs text-gray-600">Items below minimum level</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
+          <div className=" text-xm mb-2 text-black" style={{fontWeight:600}}>Active Requests</div>
+          <div className="text-3xl font-bold text-black">{stats.activeRequests}</div>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
+          <div className="text-xm mb-2 text-black" style={{fontWeight:600}}>Sterilization In Progress</div>
+          <div className="text-3xl font-bold text-black">{stats.sterilizationInProgress}</div>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
+          <div className="text-xm mb-2 text-black" style={{fontWeight:600}}>Items Ready</div>
+          <div className="text-3xl font-bold text-black">{stats.itemsReady}</div>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
+          <div className="text-xm mb-2 text-black" style={{fontWeight:600}}>Low Stock Items</div>
+          <div className="text-3xl font-bold text-black">{stats.lowStockItems}</div>
+        </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <Card className="bg-white shadow-lg">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-10 gap-y-10 my-8">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
             <CardTitle className="text-lg sm:text-xm text-gray-900">Recent Activity</CardTitle>
             <CardDescription className="text-sm text-gray-600">Latest CSSD operations</CardDescription>
@@ -145,7 +118,7 @@ const Dashboard = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
             <CardTitle className="text-lg sm:text-xm text-gray-900">Quick Actions</CardTitle>
             <CardDescription className="text-sm text-gray-600">Common CSSD tasks</CardDescription>

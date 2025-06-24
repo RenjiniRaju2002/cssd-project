@@ -34,6 +34,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const { toast } = useToast();
+  const [previousRequestSearch, setPreviousRequestSearch] = useState("");
 
   useEffect(() => {
     try {
@@ -163,17 +164,24 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
     navigate('/stock-management');
   };
 
+  const filteredPreviousRequests = receivedItems.filter(item => {
+    const matchesSearch = item.requestId.toLowerCase().includes(previousRequestSearch.toLowerCase()) ||
+                         item.department.toLowerCase().includes(previousRequestSearch.toLowerCase()) ||
+                         item.items.toLowerCase().includes(previousRequestSearch.toLowerCase());
+    return matchesSearch;
+  });
+
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-    <div className="space-y-4 sm:space-y-5 bg-[#ffffff] min-h-screen p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0">
+    <div className="space-y-4 sm:space-y-5 bg-[#ffffff] min-h-screen p-1 sm:p-5 border-t-4 border-[#038ba4] m-10 mt-0 ">
      
       <div className="bg-white shadow-sm border-l-4 border-[#038ba4]">
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="bg-white rounded-lg shadow-sm p-4 ">
       
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-xl sm:text-xl font-bold text-gray-900" style={{color:"#038ba4"}}>Receive Items</h1>
+            <h1 className="text-xl sm:text-xl font-bold text-gray-900 " style={{color:"#038ba4"}}>Receive Items</h1>
             <p className="text-sm sm:text-base text-gray-600 mt-1">Manage received requests and update status</p>
           </div>
           
@@ -220,7 +228,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
       </div>
       </div>
 
-      <Card className="bg-white shadow-lg">
+      <Card className="bg-white border border-gray-200 ">
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
           <CardTitle className="text-lg sm:text-xl text-gray-900 mb-4">Received Items Management</CardTitle>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -228,13 +236,13 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input 
                 placeholder="Search by ID, Request ID, or Department..." 
-                className="pl-10 border-none focus:ring-0 focus:shadow-none"
+                className="pl-10 border border-gray-300 focus:ring-0 focus:shadow-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-48 border-gray-300 hover:border-gray-400 focus:border-[#038ba4]">
+              <SelectTrigger className="w-full sm:w-48 border-gray-300 hover:border-gray-400 text-black">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent className="bg-white">
@@ -379,7 +387,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
       </Dialog>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-green-600 text-base">
               <CheckCircle className="w-5 h-5" />
@@ -394,7 +402,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-yellow-600 text-base">
               <Clock className="w-5 h-5" />
@@ -409,7 +417,7 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-red-600 text-base">
               <XCircle className="w-5 h-5" />

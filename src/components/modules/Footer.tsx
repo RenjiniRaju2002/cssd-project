@@ -22,12 +22,14 @@ const Footer: FC = () => {
           <span>© 2025</span>
           <a href="#">www.hodo.com</a>
           <span>Empowering Entrepreneurs in Healthcare</span>
+          <span>
           <button 
             onClick={() => setIsShortcutsOpen(true)}
             className="text-[#0d92ae] hover:text-[#006688] hover:underline transition-colors"
           >
-            Shortcuts
+            shortcuts
           </button>
+          </span>
         </div>
         <div className="footer-right">
           <button onClick={toggleFullscreen} className="fullscreen-btn" title="Toggle Fullscreen">

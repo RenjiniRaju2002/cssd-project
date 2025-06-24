@@ -51,6 +51,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [showStatusChange, setShowStatusChange] = useState(false);
+  const [tempRequests, setTempRequests] = useState([]);
 
   // Cleanup effect when component unmounts
   useEffect(() => {
@@ -131,6 +132,32 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
 
   const generateRequestId = () => {
     return `REQ${String(requests.length + 1).padStart(3, '0')}`;
+  };
+
+  const handleAddTempRequest = (event: React.FormEvent) => {
+    event.preventDefault();
+    const formData = new FormData(event.target as HTMLFormElement);
+    const newRequest = {
+      id: `REQ${String(requests.length + tempRequests.length + 1).padStart(3, '0')}`,
+      department: formData.get('department') as string,
+      items: formData.get('items') as string,
+      quantity: parseInt(formData.get('quantity') as string),
+      priority: formData.get('priority') as string,
+      status: "Requested",
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+    };
+    setTempRequests(prev => [...prev, newRequest]);
+    (event.target as HTMLFormElement).reset();
+    setSelectedDate(undefined);
+  };
+
+  const handleSaveTempRequests = () => {
+    const updatedRequests = [...requests, ...tempRequests];
+    setRequests(updatedRequests);
+    localStorage.setItem('cssdRequests', JSON.stringify(updatedRequests));
+    setTempRequests([]);
+    toast({ title: "Requests Saved", description: `${tempRequests.length} requests added.` });
   };
 
   const handleCreateRequest = (event: React.FormEvent) => {
@@ -371,18 +398,18 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
       </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-gray-900 mb-4">
               <Plus className="w-5 h-5 text-[#038ba4]" />
-              Create New Request
+              Add Request
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <form onSubmit={handleCreateRequest} className="space-y-4">
+            <form onSubmit={handleAddTempRequest} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="department" className="text-gray-700">Department</Label>
+                  <Label htmlFor="department" className="text-gray-700">Outlet</Label>
                   <Select name="department" required>
                     <SelectTrigger className="border-gray-300 text-black">
                       <SelectValue placeholder="Select department " className="text-black" />
@@ -410,12 +437,10 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                   </Select>
                 </div>
               </div>
-              
               <div>
-                <Label htmlFor="items" className="text-gray-700">Items Description</Label>
-                <Textarea name="items" placeholder="Describe the items needed" required className="border-gray-300 text-black placeholder-black" />
+                <Label htmlFor="items" className="text-gray-700">Item /Kit</Label>
+                <Input name="items" placeholder="Add item name" required className="border-gray-300 text-black placeholder-black" />
               </div>
-              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="quantity" className="text-gray-700">Quantity</Label>
@@ -441,15 +466,47 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                   </Popover>
                 </div>
               </div>
-              
               <Button type="submit" className="w-full bg-[#038ba4] hover:bg-[#027a8f] text-white">
-                Create Request
+                Add
               </Button>
             </form>
+            {/* Show temp requests table if any */}
+            {tempRequests.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-base font-semibold mb-2">Requests to be Added</h3>
+                <table className="w-full text-xs border border-gray-200">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="p-2 text-left">Request ID</th>
+                      <th className="p-2 text-left">Department</th>
+                      <th className="p-2 text-left">Priority</th>
+                      <th className="p-2 text-left">Items</th>
+                      <th className="p-2 text-left">Quantity</th>
+                      <th className="p-2 text-left">Status</th>
+                      <th className="p-2 text-left">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tempRequests.map((req) => (
+                      <tr key={req.id} className="border-b border-gray-100">
+                        <td className="p-2">{req.id}</td>
+                        <td className="p-2">{req.department}</td>
+                        <td className="p-2">{req.priority}</td>
+                        <td className="p-2">{req.items}</td>
+                        <td className="p-2">{req.quantity}</td>
+                        <td className="p-2">{req.status}</td>
+                        <td className="p-2">{req.date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <Button onClick={handleSaveTempRequests} className="mt-4 bg-green-600 hover:bg-green-700 text-white w-full">Save</Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg text-xs">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200">
             <CardTitle className="flex items-center justify-between text-lg sm:text-xl text-gray-900 mb-4">
               <span className="flex items-center gap-2 text-gray-900">
@@ -469,46 +526,15 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                   <form onSubmit={handleCreateKit} className="space-y-4">
                     <div>
                       <Label htmlFor="kitName" className="text-gray-700">Kit Name</Label>
-                      <Input name="kitName" placeholder="Enter kit name" required className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black placeholder-black" />
+                      <Input name="kitName" placeholder="Enter kit name" required className="focus:ring-[#038ba4] text-black placeholder-black" />
                     </div>
                     <div>
-                      <Label htmlFor="kitItems" className="text-gray-700">Kit Items (comma-separated)</Label>
-                      <Textarea name="kitItems" placeholder="Enter items separated by commas" required className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black placeholder-black" />
-                    </div>
-                    <div>
-                      <Label htmlFor="kitDepartment" className="text-gray-700">Department</Label>
-                      <Input name="kitDepartment" placeholder="Enter department" required className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black placeholder-black" />
-                    </div>
-                    <div>
-                      <Label htmlFor="priority" className="text-gray-700">Priority</Label>
-                      <Select name="priority" required>
-                        <SelectTrigger className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black">
-                          <SelectValue placeholder="Select priority" className="text-black" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-0">
-                          <SelectItem value="High" className="text-black">High</SelectItem>
-                          <SelectItem value="Medium" className="text-black">Medium</SelectItem>
-                          <SelectItem value="Low" className="text-black">Low</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="status" className="text-gray-700">Status</Label>
-                      <Select name="status" required>
-                        <SelectTrigger className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black">
-                          <SelectValue placeholder="Select status" className="text-black" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-0">
-                          <SelectItem value="Requested" className="text-black">Requested</SelectItem>
-                          <SelectItem value="Pending" className="text-black">Pending</SelectItem>
-                          <SelectItem value="Processing" className="text-black">Processing</SelectItem>
-                          <SelectItem value="Completed" className="text-black">Completed</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                     <Label htmlFor="items" className="text-gray-700">Item /Kit</Label>
+                     <Input name="items" placeholder="Add item name" required className="border-gray-300 text-black placeholder-black" />
+              </div>
                     <div>
                       <Label htmlFor="quantity" className="text-gray-700">Quantity</Label>
-                      <Input name="quantity" type="number" placeholder="Enter quantity" required className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] text-black placeholder-black" />
+                      <Input name="quantity" type="number" placeholder="Enter quantity" required className=" focus:ring-[#038ba4] text-black placeholder-black" />
                     </div>
                     <Button type="submit" className="w-full bg-[#038ba4] hover:bg-[#027a8f] text-white">
                       Create Package Kit
@@ -522,7 +548,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
             <div className="flex justify-between items-center mb-4">
               <Input 
                 placeholder="Search kits..." 
-                className="border-[#038ba4] focus:border-[#038ba4] focus:ring-[#038ba4] w-64"
+                className=" text-black focus:ring-[#038ba4] w-64"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -575,7 +601,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
         </Card>
       </div>
 
-      <Card className="bg-white shadow-lg">
+      <Card className="bg-white bg-white border border-gray-200">
         <CardHeader className="border-b border-gray-200">
           <CardTitle className="text-lg sm:text-xl text-gray-900 mb-4">Previous Requests</CardTitle>
           <div className="flex gap-4">
@@ -583,13 +609,13 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input 
                 placeholder="Search requests..." 
-                className="pl-10 border-gray-300"
+                className="pl-10 border-gray-300 text-black"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Select value={filterPriority} onValueChange={setFilterPriority}>
-              <SelectTrigger className="w-48 border-gray-300">
+              <SelectTrigger className="w-48 border-gray-300 text-black">
                 <SelectValue placeholder="Filter by priority" />
               </SelectTrigger>
               <SelectContent className="bg-white">
@@ -600,7 +626,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
               </SelectContent>
             </Select>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-48 border-gray-300">
+              <SelectTrigger className="w-48 border-gray-300 text-black">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent className="bg-white">

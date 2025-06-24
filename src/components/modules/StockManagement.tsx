@@ -148,7 +148,49 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
       </div>
       </div>
 
-      <Card className="bg-white shadow-lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+        <Card className="bg-white border border-gray-200">
+          <CardHeader className="border-b border-gray-200">
+            <CardTitle className="flex items-center gap-2 text-blue-600 text-base">
+              <Package className="w-5 h-5" />
+              Total Items
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">{totalItems}</div>
+            <p className="text-sm text-gray-600">Total items in stock</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-gray-200">
+          <CardHeader className="border-b border-gray-200">
+            <CardTitle className="flex items-center gap-2 text-orange-600 text-base">
+              <Edit className="w-5 h-5" />
+              Low Stock Items
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">{lowStockCount}</div>
+            <p className="text-sm text-gray-600">Items below minimum level</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-gray-200">
+          <CardHeader className="border-b border-gray-200">
+            <CardTitle className="flex items-center gap-2 text-green-600 text-base">
+              <Eye className="w-5 h-5" />
+              Categories
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">2</div>
+            <p className="text-sm text-gray-600">Number of categories</p>
+          </CardContent>
+        </Card>
+      </div>
+
+
+      <Card className="bg-white border border-gray-200">
         <CardHeader className="border-b border-gray-200">
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center gap-2 text-gray-900 text-xl">
@@ -340,46 +382,8 @@ const StockManagement = ({ sidebarCollapsed, toggleSidebar }) => {
         </DialogContent>
       </Dialog>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="bg-white shadow-lg">
-          <CardHeader className="border-b border-gray-200">
-            <CardTitle className="flex items-center gap-2 text-blue-600 text-base">
-              <Package className="w-5 h-5" />
-              Total Items
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-gray-900">{totalItems}</div>
-            <p className="text-sm text-gray-600">Total items in stock</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white shadow-lg">
-          <CardHeader className="border-b border-gray-200">
-            <CardTitle className="flex items-center gap-2 text-orange-600 text-base">
-              <Edit className="w-5 h-5" />
-              Low Stock Items
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-gray-900">{lowStockCount}</div>
-            <p className="text-sm text-gray-600">Items below minimum level</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white shadow-lg">
-          <CardHeader className="border-b border-gray-200">
-            <CardTitle className="flex items-center gap-2 text-green-600 text-base">
-              <Eye className="w-5 h-5" />
-              Categories
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-gray-900">2</div>
-            <p className="text-sm text-gray-600">Number of categories</p>
-          </CardContent>
-        </Card>
-      </div>
+      
+   
     </div>
       <Footer />
      </>

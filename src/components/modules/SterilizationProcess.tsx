@@ -231,7 +231,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <Card className="bg-white shadow-lg border-0">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
             <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
               <Play className="w-5 h-5 text-[#038ba4]" />
@@ -293,7 +293,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg border-0">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-red-600 text-base">
               <AlertCircle className="w-5 h-5" />
@@ -327,7 +327,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
         </Card>
       </div>
 
-      <Card className="bg-white shadow-lg border-0">
+      <Card className="bg-white border border-gray-200">
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
           <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
             <Timer className="w-5 h-5 text-[#038ba4]" />
@@ -415,7 +415,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
       </Card>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-        <Card className="bg-white shadow-lg border-0">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-blue-600 text-base">
               <Activity className="w-5 h-5" />
@@ -430,7 +430,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg border-0">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-green-600 text-base">
               <Timer className="w-5 h-5" />
@@ -445,7 +445,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg border-0">
+        <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-red-600 text-base">
               <AlertCircle className="w-5 h-5" />
