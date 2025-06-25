@@ -18,25 +18,34 @@ import initialData from "../../data/requestManagementData.json";
 
 
 const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
-  const [requests, setRequests] = useState(initialData.requests);
-  const [packageKits, setPackageKits] = useState(initialData.packageKits);
-  const [workflowItems, setWorkflowItems] = useState(initialData.workflowItems);
+  const [requests, setRequests] = useState(() => {
+    const saved = localStorage.getItem('cssdRequests');
+    return saved ? JSON.parse(saved) : initialData.requests;
+  });
+  const [packageKits, setPackageKits] = useState(() => {
+    const saved = localStorage.getItem('cssdPackageKits');
+    return saved ? JSON.parse(saved) : initialData.packageKits;
+  });
+  const [workflowItems, setWorkflowItems] = useState(() => {
+    const saved = localStorage.getItem('cssdWorkflowItems');
+    return saved ? JSON.parse(saved) : initialData.workflowItems;
+  });
+
+  const [currentRequest, setCurrentRequest] = useState({
+    department: "",
+    priority: "",
+    requiredDate: "",
+    items: [] as Array<{name: string, quantity: number}>
+  });
+
+  const [newItem, setNewItem] = useState({
+    name: "",
+    quantity: 1
+  });
 
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
   const searchId = queryParams.get('search');
-
-  // Load requests from localStorage on component mount
-  useEffect(() => {
-    const savedRequests = localStorage.getItem('cssdRequests');
-    if (savedRequests) {
-      setRequests(JSON.parse(savedRequests));
-    } else {
-      // Initialize with JSON data if no localStorage data exists
-      setRequests(initialData.requests);
-      localStorage.setItem('cssdRequests', JSON.stringify(initialData.requests));
-    }
-  }, []);
 
   // Save requests to localStorage whenever they change
   useEffect(() => {
@@ -50,8 +59,25 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
   const [showCreateKit, setShowCreateKit] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showRequestDetails, setShowRequestDetails] = useState(false);
-  const [showStatusChange, setShowStatusChange] = useState(false);
   const [tempRequests, setTempRequests] = useState([]);
+  const [itemsList, setItemsList] = useState([]);
+  const [itemInput, setItemInput] = useState("");
+  const [pendingItems, setPendingItems] = useState([]);
+  const [itemQuantity, setItemQuantity] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedPriority, setSelectedPriority] = useState("");
+
+  // Kit creation state variables
+  const [pendingKitItems, setPendingKitItems] = useState([]);
+  const [kitName, setKitName] = useState("");
+  const [kitDepartment, setKitDepartment] = useState("");
+  const [kitPriority, setKitPriority] = useState("");
+  const [kitQuantity, setKitQuantity] = useState("");
+  const [kitItemInput, setKitItemInput] = useState("");
+
+  // Pagination state for Previous Requests
+  const [currentPage, setCurrentPage] = useState(1);
+  const requestsPerPage = 7;
 
   // Cleanup effect when component unmounts
   useEffect(() => {
@@ -60,7 +86,6 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
       setShowCreateKit(false);
       setSelectedRequest(null);
       setShowRequestDetails(false);
-      setShowStatusChange(false);
     };
   }, []);
 
@@ -94,34 +119,10 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
     });
   };
 
-  // Load package kits from localStorage on component mount
-  useEffect(() => {
-    const savedKits = localStorage.getItem('cssdPackageKits');
-    if (savedKits) {
-      setPackageKits(JSON.parse(savedKits));
-    } else {
-      // Initialize with JSON data if no localStorage data exists
-      setPackageKits(initialData.packageKits);
-      localStorage.setItem('cssdPackageKits', JSON.stringify(initialData.packageKits));
-    }
-  }, []);
-
   // Save package kits to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('cssdPackageKits', JSON.stringify(packageKits));
   }, [packageKits]);
-
-  // Load workflow items from localStorage on component mount
-  useEffect(() => {
-    const savedWorkflowItems = localStorage.getItem('cssdWorkflowItems');
-    if (savedWorkflowItems) {
-      setWorkflowItems(JSON.parse(savedWorkflowItems));
-    } else {
-      // Initialize with JSON data if no localStorage data exists
-      setWorkflowItems(initialData.workflowItems);
-      localStorage.setItem('cssdWorkflowItems', JSON.stringify(initialData.workflowItems));
-    }
-  }, []);
 
   // Save workflow items to localStorage whenever they change
   useEffect(() => {
@@ -134,30 +135,89 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
     return `REQ${String(requests.length + 1).padStart(3, '0')}`;
   };
 
-  const handleAddTempRequest = (event: React.FormEvent) => {
-    event.preventDefault();
-    const formData = new FormData(event.target as HTMLFormElement);
-    const newRequest = {
-      id: `REQ${String(requests.length + tempRequests.length + 1).padStart(3, '0')}`,
-      department: formData.get('department') as string,
-      items: formData.get('items') as string,
-      quantity: parseInt(formData.get('quantity') as string),
-      priority: formData.get('priority') as string,
-      status: "Requested",
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
-    };
-    setTempRequests(prev => [...prev, newRequest]);
-    (event.target as HTMLFormElement).reset();
-    setSelectedDate(undefined);
+  const handleAddItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newItem.name.trim() && newItem.quantity > 0) {
+      setCurrentRequest(prev => ({
+        ...prev,
+        items: [...prev.items, { ...newItem }]
+      }));
+      setNewItem({ name: "", quantity: 1 });
+    }
   };
 
-  const handleSaveTempRequests = () => {
-    const updatedRequests = [...requests, ...tempRequests];
-    setRequests(updatedRequests);
-    localStorage.setItem('cssdRequests', JSON.stringify(updatedRequests));
-    setTempRequests([]);
-    toast({ title: "Requests Saved", description: `${tempRequests.length} requests added.` });
+  const handleRemoveItem = (index: number) => {
+    setCurrentRequest(prev => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSaveRequest = () => {
+    if (pendingItems.length === 0) {
+      toast({ 
+        title: "No Items", 
+        description: "Please add at least one item to the request.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Create a new request with all pending items
+      const newRequest = {
+        id: generateRequestId(),
+        department: pendingItems[0].department,
+        priority: pendingItems[0].priority,
+        items: pendingItems.map(i => i.item).join(", "),
+        quantity: pendingItems.reduce((sum, i) => sum + Number(i.quantity), 0),
+        status: "Requested",
+        date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
+        time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+      };
+
+      // Create workflow item
+      const workflowItem = {
+        id: newRequest.id,
+        requestId: newRequest.id,
+        kitId: "",
+        sterilizationId: "",
+        currentStatus: "Requested",
+        timestamp: new Date().toISOString(),
+        location: "Request Queue"
+      };
+
+      // Update states
+      const updatedRequests = [...requests, newRequest];
+      const updatedWorkflowItems = [...workflowItems, workflowItem];
+      
+      setRequests(updatedRequests);
+      setWorkflowItems(updatedWorkflowItems);
+      setPendingItems([]);
+      
+      // Reset form fields
+      setSelectedDepartment("");
+      setSelectedPriority("");
+      setItemInput("");
+      setItemQuantity("");
+      setSelectedDate(undefined);
+
+      // Save to localStorage
+      localStorage.setItem('cssdRequests', JSON.stringify(updatedRequests));
+      localStorage.setItem('cssdWorkflowItems', JSON.stringify(updatedWorkflowItems));
+
+      toast({
+        title: "Request Created",
+        description: `Request ${newRequest.id} has been created successfully.`,
+      });
+    } catch (error) {
+      console.error("Error saving request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save request. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCreateRequest = (event: React.FormEvent) => {
@@ -297,74 +357,6 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
     setShowRequestDetails(true);
   };
 
-  const handleStatusChange = (request: any) => {
-    setSelectedRequest(request);
-    setShowStatusChange(true);
-  };
-
-  const handleUpdateStatus = (requestId: string, newStatus: string) => {
-    // Update requests state
-    setRequests(prevRequests => {
-      const updatedRequests = prevRequests.map(request => 
-        request.id === requestId ? { ...request, status: newStatus } : request
-      );
-      localStorage.setItem('cssdRequests', JSON.stringify(updatedRequests));
-      return updatedRequests;
-    });
-
-    // Update workflow items
-    setWorkflowItems(prevWorkflow => {
-      const updatedWorkflow = prevWorkflow.map(item =>
-        item.requestId === requestId ? { ...item, currentStatus: newStatus } : item
-      );
-      localStorage.setItem('cssdWorkflowItems', JSON.stringify(updatedWorkflow));
-      return updatedWorkflow;
-    });
-
-    // Close status change dialog
-    setShowStatusChange(false);
-    setSelectedRequest(null);
-
-    // Force a re-render to update the UI
-    setRequests(prev => [...prev]);
-  };
-
-  // Add useEffect to listen for localStorage changes
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'cssdRequests' || e.key === 'cssdWorkflowItems') {
-        loadRequests();
-        loadWorkflowItems();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  // Add loading functions
-  const loadRequests = () => {
-    const savedRequests = localStorage.getItem('cssdRequests');
-    if (savedRequests) {
-      const parsedRequests = JSON.parse(savedRequests);
-      setRequests(parsedRequests);
-    }
-  };
-
-  const loadWorkflowItems = () => {
-    const savedWorkflow = localStorage.getItem('cssdWorkflowItems');
-    if (savedWorkflow) {
-      const parsedWorkflow = JSON.parse(savedWorkflow);
-      setWorkflowItems(parsedWorkflow);
-    }
-  };
-
-  // Load initial data
-  useEffect(() => {
-    loadRequests();
-    loadWorkflowItems();
-  }, []);
-
   // Filter package kits based on search term
   const filteredKits = packageKits.filter(kit => 
     kit.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -387,6 +379,154 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
     return matchesSearch && matchesPriority && matchesStatus;
   });
 
+  // Pagination logic for Previous Requests
+  const totalPages = Math.ceil(filteredRequests.length / requestsPerPage);
+  const indexOfLastRequest = currentPage * requestsPerPage;
+  const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
+  const currentRequests = filteredRequests.slice(indexOfFirstRequest, indexOfLastRequest);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterPriority, filterStatus]);
+
+  const addItemToList = () => {
+    if (itemInput.trim()) {
+      setItemsList(prev => [...prev, itemInput.trim()]);
+      setItemInput("");
+    }
+  };
+
+  // Add function to add item and details to pendingItems
+  const addItemToPending = (event) => {
+    event.preventDefault();
+    if (!itemInput.trim() || !itemQuantity || !selectedDepartment || !selectedPriority || !selectedDate) {
+      toast({ title: "Missing Fields", description: "Please fill all fields before adding." });
+      return;
+    }
+    setPendingItems(prev => [
+      ...prev,
+      {
+        department: selectedDepartment,
+        priority: selectedPriority,
+        item: itemInput.trim(),
+        quantity: itemQuantity,
+        date: selectedDate
+      }
+    ]);
+    setItemInput("");
+    setItemQuantity("");
+  };
+
+  // Add function to add item to kit pending list
+  const addItemToKitPending = (event) => {
+    event.preventDefault();
+    if (!kitItemInput.trim() || !kitQuantity || !kitDepartment || !kitPriority || !kitName.trim()) {
+      toast({ title: "Missing Fields", description: "Please fill all fields before adding." });
+      return;
+    }
+    setPendingKitItems(prev => [
+      ...prev,
+      {
+        department: kitDepartment,
+        priority: kitPriority,
+        item: kitItemInput.trim(),
+        quantity: kitQuantity,
+        kitName: kitName.trim()
+      }
+    ]);
+    setKitItemInput("");
+    setKitQuantity("");
+  };
+
+  // Save kit function
+  const handleSaveKit = () => {
+    if (pendingKitItems.length === 0) {
+      toast({ 
+        title: "No Items", 
+        description: "Please add at least one item to the kit.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Create a new kit with all pending items
+      const newKitId = `KIT${String(packageKits.length + 1).padStart(3, '0')}`;
+      const newKit = {
+        id: newKitId,
+        requestId: generateRequestId(),
+        name: pendingKitItems[0].kitName,
+        items: pendingKitItems.map(i => i.item),
+        department: pendingKitItems[0].department,
+        priority: pendingKitItems[0].priority,
+        status: "Requested",
+        quantity: pendingKitItems.reduce((sum, i) => sum + Number(i.quantity), 0),
+        creationDate: new Date().toISOString().split('T')[0]
+      };
+
+      // Create request for the new kit
+      const newRequest = {
+        id: newKit.requestId,
+        department: newKit.department,
+        items: newKit.name,
+        quantity: newKit.quantity,
+        priority: newKit.priority,
+        status: "Requested",
+        date: newKit.creationDate,
+        time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+      };
+
+      // Add to workflow tracking
+      const workflowItem = {
+        id: newKit.requestId,
+        requestId: newKit.requestId,
+        kitId: newKitId,
+        sterilizationId: "",
+        currentStatus: "Requested",
+        timestamp: new Date().toISOString(),
+        location: "Request Queue"
+      };
+
+      // Update states
+      const updatedKits = [...packageKits, newKit];
+      const updatedRequests = [...requests, newRequest];
+      const updatedWorkflowItems = [...workflowItems, workflowItem];
+      
+      setPackageKits(updatedKits);
+      setRequests(updatedRequests);
+      setWorkflowItems(updatedWorkflowItems);
+      setPendingKitItems([]);
+      
+      // Reset form fields
+      setKitName("");
+      setKitDepartment("");
+      setKitPriority("");
+      setKitItemInput("");
+      setKitQuantity("");
+
+      // Save to localStorage
+      localStorage.setItem('cssdPackageKits', JSON.stringify(updatedKits));
+      localStorage.setItem('cssdRequests', JSON.stringify(updatedRequests));
+      localStorage.setItem('cssdWorkflowItems', JSON.stringify(updatedWorkflowItems));
+
+      // Close the dialog
+      setShowCreateKit(false);
+
+      toast({
+        title: "Package Kit Created",
+        description: `Kit ${newKitId} and Request ${newKit.requestId} have been created successfully.`,
+      });
+    } catch (error) {
+      console.error("Error saving kit:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save kit. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
@@ -406,11 +546,11 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <form onSubmit={handleAddTempRequest} className="space-y-4">
+            <form className="space-y-4" onSubmit={addItemToPending}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="department" className="text-gray-700">Outlet</Label>
-                  <Select name="department" required>
+                  <Select name="department" value={selectedDepartment} onValueChange={setSelectedDepartment} required>
                     <SelectTrigger className="border-gray-300 text-black">
                       <SelectValue placeholder="Select department " className="text-black" />
                     </SelectTrigger>
@@ -425,7 +565,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                 </div>
                 <div>
                   <Label htmlFor="priority" className="text-black">Priority</Label>
-                  <Select name="priority" required>
+                  <Select name="priority" value={selectedPriority} onValueChange={setSelectedPriority} required>
                     <SelectTrigger className="border-gray-300 text-black">
                       <SelectValue placeholder="Select priority" className="text-black" />
                     </SelectTrigger>
@@ -439,12 +579,12 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
               </div>
               <div>
                 <Label htmlFor="items" className="text-gray-700">Item /Kit</Label>
-                <Input name="items" placeholder="Add item name" required className="border-gray-300 text-black placeholder-black" />
+                <Input value={itemInput} onChange={e => setItemInput(e.target.value)} placeholder="Add item name" className="border-gray-300 text-black placeholder-black" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="quantity" className="text-gray-700">Quantity</Label>
-                  <Input name="quantity" type="number" placeholder="Enter quantity" required className="border-gray-300 text-black placeholder-black" />
+                  <Input value={itemQuantity} onChange={e => setItemQuantity(e.target.value)} type="number" placeholder="Enter quantity" className="border-gray-300 text-black placeholder-black" />
                 </div>
                 <div>
                   <Label className="text-gray-700">Required Date</Label>
@@ -470,37 +610,65 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                 Add
               </Button>
             </form>
-            {/* Show temp requests table if any */}
-            {tempRequests.length > 0 && (
+            {/* Show pending items in table */}
+            {pendingItems.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-base font-semibold mb-2">Requests to be Added</h3>
-                <table className="w-full text-xs border border-gray-200">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="p-2 text-left">Request ID</th>
-                      <th className="p-2 text-left">Department</th>
-                      <th className="p-2 text-left">Priority</th>
-                      <th className="p-2 text-left">Items</th>
-                      <th className="p-2 text-left">Quantity</th>
-                      <th className="p-2 text-left">Status</th>
-                      <th className="p-2 text-left">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tempRequests.map((req) => (
-                      <tr key={req.id} className="border-b border-gray-100">
-                        <td className="p-2">{req.id}</td>
-                        <td className="p-2">{req.department}</td>
-                        <td className="p-2">{req.priority}</td>
-                        <td className="p-2">{req.items}</td>
-                        <td className="p-2">{req.quantity}</td>
-                        <td className="p-2">{req.status}</td>
-                        <td className="p-2">{req.date}</td>
+                <h3 className="text-base font-semibold mb-2 text-black">Requests to be Added</h3>
+                <div className="overflow-x-auto text-black">
+                  <table className="w-full text-xs border border-gray-200">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="p-2 text-left">Department</th>
+                        <th className="p-2 text-left">Priority</th>
+                        <th className="p-2 text-left">Item</th>
+                        <th className="p-2 text-left">Quantity</th>
+                        <th className="p-2 text-left">Date</th>
+                        <th className="p-2 text-left">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <Button onClick={handleSaveTempRequests} className="mt-4 bg-green-600 hover:bg-green-700 text-white w-full">Save</Button>
+                    </thead>
+                    <tbody>
+                      {pendingItems.map((item, idx) => (
+                        <tr key={idx} className="border-b border-gray-100">
+                          <td className="p-2">{item.department}</td>
+                          <td className="p-2">{item.priority}</td>
+                          <td className="p-2">{item.item}</td>
+                          <td className="p-2">{item.quantity}</td>
+                          <td className="p-2">{format(new Date(item.date), "yyyy-MM-dd")}</td>
+                          <td className="p-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-black hover:bg-gray-200 p-1 h-6"
+                              onClick={() => {
+                                setPendingItems(prev => prev.filter((_, i) => i !== idx));
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-1 flex justify-end space-x-2">
+                  <Button 
+                    variant="outline"
+                    onClick={() => setPendingItems([])}
+                    className="bg-[#038ba4] hover:bg-[#027a8f] text-white"
+                  >
+                    Clear All
+                  </Button>
+                  <Button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleSaveRequest();
+                    }}
+                    className="bg-[#038ba4] hover:bg-[#027a8f] text-white"
+                  >
+                    Save Request
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
@@ -523,23 +691,134 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                   <DialogHeader>
                     <DialogTitle className="text-gray-900">Create Package Kit</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleCreateKit} className="space-y-4">
+                  <form onSubmit={addItemToKitPending} className="space-y-4">
                     <div>
                       <Label htmlFor="kitName" className="text-gray-700">Kit Name</Label>
-                      <Input name="kitName" placeholder="Enter kit name" required className="focus:ring-[#038ba4] text-black placeholder-black" />
+                      <Input 
+                        value={kitName} 
+                        onChange={e => setKitName(e.target.value)} 
+                        placeholder="Enter kit name" 
+                        required 
+                        className="focus:ring-[#038ba4] text-black placeholder-black" 
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="kitDepartment" className="text-gray-700">Outlet</Label>
+                        <Select value={kitDepartment} onValueChange={setKitDepartment} required>
+                          <SelectTrigger className="border-gray-300 text-black">
+                            <SelectValue placeholder="Select department" className="text-black" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white">
+                            <SelectItem value="OR-1" className="text-black">OR-1</SelectItem>
+                            <SelectItem value="OR-2" className="text-black">OR-2</SelectItem>
+                            <SelectItem value="OR-3" className="text-black">OR-3</SelectItem>
+                            <SelectItem value="ICU" className="text-black">ICU</SelectItem>
+                            <SelectItem value="Emergency" className="text-black">Emergency</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="kitPriority" className="text-black">Priority</Label>
+                        <Select value={kitPriority} onValueChange={setKitPriority} required>
+                          <SelectTrigger className="border-gray-300 text-black">
+                            <SelectValue placeholder="Select priority" className="text-black" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white">
+                            <SelectItem value="High" className="text-black">High</SelectItem>
+                            <SelectItem value="Medium" className="text-black">Medium</SelectItem>
+                            <SelectItem value="Low" className="text-black">Low</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                     <div>
-                     <Label htmlFor="items" className="text-gray-700">Item /Kit</Label>
-                     <Input name="items" placeholder="Add item name" required className="border-gray-300 text-black placeholder-black" />
-              </div>
+                      <Label htmlFor="kitItem" className="text-gray-700">Item /Kit</Label>
+                      <Input 
+                        value={kitItemInput} 
+                        onChange={e => setKitItemInput(e.target.value)} 
+                        placeholder="Add item name" 
+                        required 
+                        className="border-gray-300 text-black placeholder-black" 
+                      />
+                    </div>
                     <div>
-                      <Label htmlFor="quantity" className="text-gray-700">Quantity</Label>
-                      <Input name="quantity" type="number" placeholder="Enter quantity" required className=" focus:ring-[#038ba4] text-black placeholder-black" />
+                      <Label htmlFor="kitQuantity" className="text-gray-700">Quantity</Label>
+                      <Input 
+                        value={kitQuantity} 
+                        onChange={e => setKitQuantity(e.target.value)} 
+                        type="number" 
+                        placeholder="Enter quantity" 
+                        required 
+                        className="border-gray-300 text-black placeholder-black" 
+                      />
                     </div>
                     <Button type="submit" className="w-full bg-[#038ba4] hover:bg-[#027a8f] text-white">
-                      Create Package Kit
+                      Add Item
                     </Button>
                   </form>
+                  
+                  {/* Show pending kit items in table */}
+                  {pendingKitItems.length > 0 && (
+                    <div className="mt-8">
+                      <h3 className="text-base font-semibold mb-2 text-black">Kit Items to be Added</h3>
+                      <div className="overflow-x-auto text-black">
+                        <table className="w-full text-xs border border-gray-200">
+                          <thead className="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                              <th className="p-2 text-left">Kit Name</th>
+                              <th className="p-2 text-left">Department</th>
+                              <th className="p-2 text-left">Priority</th>
+                              <th className="p-2 text-left">Item</th>
+                              <th className="p-2 text-left">Quantity</th>
+                              <th className="p-2 text-left">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {pendingKitItems.map((item, idx) => (
+                              <tr key={idx} className="border-b border-gray-100">
+                                <td className="p-2">{item.kitName}</td>
+                                <td className="p-2">{item.department}</td>
+                                <td className="p-2">{item.priority}</td>
+                                <td className="p-2">{item.item}</td>
+                                <td className="p-2">{item.quantity}</td>
+                                <td className="p-2">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="text-black hover:bg-gray-200 p-1 h-6 "
+                                    onClick={() => {
+                                      setPendingKitItems(prev => prev.filter((_, i) => i !== idx));
+                                    }}
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="mt-1 flex justify-end space-x-2">
+                        <Button 
+                          variant="outline"
+                          onClick={() => setPendingKitItems([])}
+                          className="bg-[#038ba4] hover:bg-[#027a8f] text-white"
+                        >
+                          Clear All
+                        </Button>
+                        <Button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleSaveKit();
+                          }}
+                          className="bg-[#038ba4] hover:bg-[#027a8f] text-white"
+                        >
+                          Save Kit
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </DialogContent>
               </Dialog>
             </CardTitle>
@@ -631,7 +910,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
               </SelectTrigger>
               <SelectContent className="bg-white">
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Requested">Requested</SelectItem>
                 <SelectItem value="Processing">Processing</SelectItem>
                 <SelectItem value="Completed">Completed</SelectItem>
               </SelectContent>
@@ -654,7 +933,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredRequests.map((request) => (
+                {currentRequests.map((request) => (
                   <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="p-4 font-medium text-gray-900">{request.id}</td>
                     <td className="p-4 text-gray-900">{request.department}</td>
@@ -671,7 +950,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                     <td className="p-4 text-gray-900">{request.quantity}</td>
                     <td className="p-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        request.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
+                        request.status === 'Requested' ? 'bg-gray-100 text-gray-800' :
                         request.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
                         'bg-green-100 text-green-800'
                       }`}>
@@ -689,14 +968,6 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                         <Eye className="w-4 h-4 text-black" />
                       </Button>
                       <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleStatusChange(request)}
-                        className="text-black hover:bg-gray-100"
-                      >
-                        Change Status
-                      </Button>
-                      <Button 
                         variant="ghost" 
                         size="sm"
                         onClick={() => handleDeleteRequest(request.id)}
@@ -710,6 +981,55 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
               </tbody>
             </table>
           </div>
+          
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+              <div className="text-sm text-gray-700">
+                Showing {indexOfFirstRequest + 1} to {Math.min(indexOfLastRequest, filteredRequests.length)} of {filteredRequests.length} requests
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Previous
+                </Button>
+                
+                {/* Page Numbers */}
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className={
+                        currentPage === page 
+                          ? "bg-[#038ba4] text-white hover:bg-[#027a8f]" 
+                          : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                      }
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -743,7 +1063,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                 <div>
                   <Label className="text-gray-700">Status</Label>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    selectedRequest.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
+                    selectedRequest.status === 'Requested' ? 'bg-gray-100 text-gray-800' :
                     selectedRequest.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
                     'bg-green-100 text-green-800'
                   }`}>
@@ -764,51 +1084,6 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                   <Label className="text-gray-700">Date</Label>
                   <p className="text-gray-900">{selectedRequest.date}</p>
                 </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Status Change Dialog */}
-      <Dialog open={showStatusChange} onOpenChange={setShowStatusChange}>
-        <DialogContent className="bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-gray-900">Change Request Status</DialogTitle>
-          </DialogHeader>
-          {selectedRequest && (
-            <div className="space-y-4">
-              <div>
-                <Label className="text-gray-700">Request ID</Label>
-                <p className="font-medium text-gray-900">{selectedRequest.id}</p>
-              </div>
-              <div>
-                <Label className="text-gray-700">Current Status</Label>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  selectedRequest.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
-                  selectedRequest.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
-                  'bg-green-100 text-green-800'
-                }`}>
-                  {selectedRequest.status}
-                </span>
-              </div>
-              <div>
-                <Label htmlFor="newStatus" className="text-gray-700">Status</Label>
-                <Select 
-                  value={selectedRequest?.status || ""} 
-                  onValueChange={(value) => {
-                    handleUpdateStatus(selectedRequest?.id || "", value);
-                  }}
-                >
-                  <SelectTrigger className="border-gray-300">
-                    <SelectValue placeholder="Select new status" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="Pending">Pending</SelectItem>
-                    <SelectItem value="Processing">Processing</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
           )}

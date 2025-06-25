@@ -141,7 +141,7 @@ export function AppSidebar() {
                     <SidebarMenuButton 
                       asChild 
                       isActive={location.pathname === item.url}
-                      className="hover:bg-[#b2e4f1] text-white hover:text-black data-[active=true]:bg-[#80def7] hover:border-r-4 hover:border-[#0d92ae] data-[active=true]:border-r-4 data-[active=true]:border-[#0d92ae] data-[active=true]:text-white rounded-none"
+                      className="hover:bg-[#b2e4f1] text-white hover:text-black data-[active=true]:bg-[#80def7] hover:border-r-4 hover:border-[#0d92ae] data-[active=true]:border-r-4 data-[active=true]:border-[#0d92ae] data-[active=true]:text-black rounded-none"
                     >
                       <Link to={item.url} className="flex items-center gap-3 px-4 py-2">
                         <FontAwesomeIcon icon={item.icon} className="w-4 h-4" />

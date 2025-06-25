@@ -36,15 +36,14 @@ export function CssdNavbar({ sidebarCollapsed, toggleSidebar }: CssdNavbarProps)
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", path: "/" },
-    { id: "request-management", label: "Request Management", path: "/request-management" },
+    { id: "billing", label: "Billing", path: "/billing" },
+    { id: "pharmacy", label: "Pharmacy", path: "/pharmacy" },
+    { id: "Appointments", label: "Appointments", path: "/appointments" },
   ];
 
   const moreNavItems = [
-    { id: "receive-items", label: "Receive Items", path: "/receive-items" },
-    { id: "sterilization-process", label: "Sterilization Process", path: "/sterilization-process" },
-    { id: "issue-item", label: "Issue Item", path: "/issue-item" },
-    { id: "stock-management", label: "Stock Management", path: "/stock-management" },
-    { id: "consumption-reports", label: "Consumption Reports", path: "/consumption-reports" },
+    // Add more modules here if needed
+    // Example: { id: "appointments", label: "Appointments", path: "/appointments" },
   ];
 
   useEffect(() => {

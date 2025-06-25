@@ -21,6 +21,10 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [completedSterilizedIds, setCompletedSterilizedIds] = useState([]);
+  const [sterilizationMap, setSterilizationMap] = useState({});
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -30,7 +34,32 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
     localStorage.setItem('issuedItems', JSON.stringify(issuedItems));
   }, [issuedItems]);
 
+  useEffect(() => {
+    // Load pending requests from localStorage
+    const savedRequests = localStorage.getItem('cssdRequests');
+    if (savedRequests) {
+      const requests = JSON.parse(savedRequests);
+      setPendingRequests(requests.filter(r => r.status === "Pending"));
+    }
+  }, []);
+
+  useEffect(() => {
+    // Load completed sterilization processes
+    const savedProcesses = localStorage.getItem('sterilizationProcesses');
+    if (savedProcesses) {
+      const processes = JSON.parse(savedProcesses);
+      setCompletedSterilizedIds(processes.filter(p => p.status === 'Completed').map(p => p.itemId));
+      // Build a map of itemId to status
+      const map = {};
+      processes.forEach(p => { map[p.itemId] = p.status; });
+      setSterilizationMap(map);
+    }
+  }, []);
+
   const availableItems = initialData.availableItems;
+
+  // Filter availableItems for completed sterilization only
+  const filteredAvailableItems = availableItems.filter(item => completedSterilizedIds.includes(item.id));
 
   const handleIssueItem = (event: React.FormEvent) => {
     event.preventDefault();
@@ -90,15 +119,19 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
               <div>
                 <Label htmlFor="requestId" className="text-gray-700">Request ID</Label>
                 <Select name="requestId" required>
-                  <SelectTrigger className="border-gray-300">
+                  <SelectTrigger className="border-gray-300 text-black">
                     <SelectValue placeholder="Select request to issue" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-0">
-                    {availableItems.map((item) => (
-                      <SelectItem key={item.id} value={item.id}>
-                        {item.id} - {item.items} ({item.quantity} units)
-                      </SelectItem>
-                    ))}
+                    {pendingRequests.length === 0 ? (
+                      <SelectItem value="" disabled>No pending requests</SelectItem>
+                    ) : (
+                      pendingRequests.map((item) => (
+                        <SelectItem key={item.id} value={item.id}>
+                          {item.id} - {item.items} ({item.quantity} units)
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -106,7 +139,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
               <div>
                 <Label htmlFor="outlet" className="text-gray-700">Department/Outlet</Label>
                 <Select name="outlet" required>
-                  <SelectTrigger className="border-gray-300">
+                  <SelectTrigger className="border-gray-300 text-black">
                     <SelectValue placeholder="Select destination" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-0">
@@ -121,7 +154,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 text-black">
                 <div>
                   <Label className="text-gray-700">Issue Time</Label>
                   <Input 
@@ -161,7 +194,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-3 max-h-64 overflow-y-auto">
-              {availableItems.map((item) => (
+              {filteredAvailableItems.map((item) => (
                 <div key={item.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 bg-white">
                   <div className="flex justify-between items-start">
                     <div>
@@ -170,7 +203,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
                       <p className="text-xs text-gray-500">Qty: {item.quantity} | Ready: {item.readyTime}</p>
                     </div>
                     <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                      {item.status}
+                      {sterilizationMap[item.id] || item.status}
                     </span>
                   </div>
                 </div>

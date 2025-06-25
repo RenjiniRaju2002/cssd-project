@@ -56,6 +56,18 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
   const [machines, setMachines] = useState(initialData.machines);
   const sterilizationMethods = initialData.sterilizationMethods;
 
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [selectedRequestId, setSelectedRequestId] = useState("");
+
+  useEffect(() => {
+    // Load processing requests from localStorage
+    const savedRequests = localStorage.getItem('cssdRequests');
+    if (savedRequests) {
+      const requests = JSON.parse(savedRequests);
+      setPendingRequests(requests.filter(r => r.status === "Processing"));
+    }
+  }, []);
+
   const startSterilization = (event: React.FormEvent) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
@@ -63,7 +75,7 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
       id: `STE${String(processes.length + 1).padStart(3, '0')}`,
       machine: selectedMachine,
       process: selectedProcess,
-      itemId: formData.get('itemId') as string,
+      itemId: selectedRequestId,
       startTime: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
       endTime: "",
       status: "In Progress",
@@ -243,8 +255,8 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
               <div>
                 <Label htmlFor="machine" className="text-gray-700 text-sm">Select Machine</Label>
                 <Select value={selectedMachine} onValueChange={setSelectedMachine} required>
-                  <SelectTrigger className="border-gray-300 hover:border-gray-400 focus:border-[#038ba4] mt-1">
-                    <SelectValue placeholder="Choose sterilization machine" />
+                  <SelectTrigger className="border-gray-300 hover:border-gray-400 mt-1 text-black">
+                    <SelectValue placeholder="Choose sterilization machine"/>
                   </SelectTrigger>
                   <SelectContent className="bg-white border-0">
                     {machines.filter(machine => machine.status === "Available").map((machine) => (
@@ -259,8 +271,8 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
               <div>
                 <Label htmlFor="process" className="text-gray-700 text-sm">Sterilization Method</Label>
                 <Select value={selectedProcess} onValueChange={setSelectedProcess} required>
-                  <SelectTrigger className="border-gray-300 hover:border-gray-400 focus:border-[#038ba4] mt-1">
-                    <SelectValue placeholder="Choose sterilization method" />
+                  <SelectTrigger className="border-gray-300 hover:border-gray-400 mt-1 text-black">
+                    <SelectValue placeholder="Choose sterilization method"/>
                   </SelectTrigger>
                   <SelectContent className="bg-white border-0">
                     {sterilizationMethods.map((method) => (
@@ -274,18 +286,26 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
 
               <div>
                 <Label htmlFor="itemId" className="text-gray-700 text-sm">Item/Request ID</Label>
-                <Input 
-                  name="itemId" 
-                  placeholder="Enter request ID" 
-                  required 
-                  className="border-gray-300 hover:border-gray-400 focus:border-[#038ba4] mt-1" 
-                />
+                <Select value={selectedRequestId} onValueChange={setSelectedRequestId} required>
+                  <SelectTrigger className="border-gray-300 hover:border-gray-400 mt-1 text-black">
+                    <SelectValue placeholder="Select pending request ID" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-0">
+                    {pendingRequests.length === 0 ? (
+                      <SelectItem value="" disabled>No pending requests</SelectItem>
+                    ) : (
+                      pendingRequests.map((req) => (
+                        <SelectItem key={req.id} value={req.id}>{req.id}</SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
 
               <Button 
                 type="submit" 
                 className="w-full bg-[#038ba4] hover:bg-[#038ba4] text-white text-sm py-2" 
-                disabled={!selectedMachine || !selectedProcess}
+                disabled={!selectedMachine || !selectedProcess || !selectedRequestId}
               >
                 Start Sterilization Process
               </Button>
@@ -365,10 +385,8 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="In Progress">In Progress</SelectItem>
-                          <SelectItem value="Completed">Completed</SelectItem>
                           <SelectItem value="Paused">Paused</SelectItem>
-                          <SelectItem value="Pending">Pending</SelectItem>
-                          <SelectItem value="Cancelled">Cancelled</SelectItem>
+                          <SelectItem value="Completed">Completed</SelectItem>
                         </SelectContent>
                       </Select>
                     </td>

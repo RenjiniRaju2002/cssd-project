@@ -560,7 +560,7 @@ ${filteredData.map(item =>
                   <div>
                     <Label className="text-black text-sm font-poppins">Department</Label>
                     <Select value={formData.department} onValueChange={(value) => handleInputChange("department", value)}>
-                      <SelectTrigger className="border-gray-300  mt-1">
+                      <SelectTrigger className="border-gray-300  mt-1 text-black">
                         <SelectValue placeholder="Select department" />
                       </SelectTrigger>
                       <SelectContent className="">
@@ -637,7 +637,7 @@ ${filteredData.map(item =>
                 <tr>
                   <th className="text-left p-3 text-gray-700 font-medium text-sm">Surgery ID</th>
                   <th className="text-left p-3 text-gray-700 font-medium text-sm">Surgery Type</th>
-                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Department</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm ">Department</th>
                   <th className="text-left p-3 text-gray-700 font-medium text-sm">Date</th>
                   <th className="text-left p-3 text-gray-700 font-medium text-sm">Before Count</th>
                   <th className="text-left p-3 text-gray-700 font-medium text-sm">After Count</th>

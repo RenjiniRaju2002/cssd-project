@@ -28,13 +28,29 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
     const savedWorkflowItems = localStorage.getItem('workflowItems');
     return savedWorkflowItems ? JSON.parse(savedWorkflowItems) : initialData.workflowItems;
   });
+  
+  // Load requested items from Request Management
+  const [requestedItems, setRequestedItems] = useState([]);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedItem, setSelectedItem] = useState(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const { toast } = useToast();
   const [previousRequestSearch, setPreviousRequestSearch] = useState("");
+
+  // Pagination state for Requested Items
+  const [currentPage, setCurrentPage] = useState(1);
+  const requestsPerPage = 7;
+
+  // Load requested items from localStorage on component mount
+  useEffect(() => {
+    const savedRequests = localStorage.getItem('cssdRequests');
+    if (savedRequests) {
+      const requests = JSON.parse(savedRequests);
+      setRequestedItems(requests);
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -50,54 +66,9 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
 
   useEffect(() => {
     return () => {
-      setIsAddDialogOpen(false);
       setIsViewDialogOpen(false);
     };
   }, []);
-
-  const handleReceiveItem = (event: React.FormEvent) => {
-    event.preventDefault();
-    const formData = new FormData(event.target as HTMLFormElement);
-    const newReceive = {
-      id: `REC${String(receivedItems.length + 1).padStart(3, '0')}`,
-      requestId: formData.get('requestId') as string,
-      department: formData.get('department') as string,
-      items: formData.get('items') as string,
-      quantity: parseInt(formData.get('quantity') as string),
-      receivedQty: parseInt(formData.get('receivedQty') as string),
-      status: "Partial",
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
-    };
-
-    // Update status based on received quantity
-    if (newReceive.receivedQty === newReceive.quantity) {
-      newReceive.status = "Complete";
-    } else if (newReceive.receivedQty > 0) {
-      newReceive.status = "Partial";
-    } else {
-      newReceive.status = "Pending";
-    }
-
-    // Update workflow status
-    const updatedWorkflowItems = workflowItems.map(item => 
-      item.requestId === newReceive.requestId ? {
-        ...item,
-        currentStatus: "Received",
-        timestamp: new Date().toISOString(),
-        location: "Receiving Area"
-      } : item
-    );
-    setWorkflowItems(updatedWorkflowItems);
-
-    setReceivedItems(prev => [...prev, newReceive]);
-    setIsAddDialogOpen(false);
-    
-    toast({
-      title: "Item Received",
-      description: `Item ${newReceive.id} has been received successfully.`,
-    });
-  };
 
   const handleUpdateStatus = (id: string, status: string) => {
     setReceivedItems(prev => 
@@ -126,20 +97,126 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
     });
   };
 
-  const filteredItems = receivedItems.filter(item => {
+  const goToStockManagement = () => {
+    navigate('/stock-management');
+  };
+
+  // Handle receiving an item from the requested items list
+  const handleReceiveFromRequest = (request) => {
+    const newReceive = {
+      id: `REC${String(receivedItems.length + 1).padStart(3, '0')}`,
+      requestId: request.id,
+      department: request.department,
+      items: request.items,
+      quantity: request.quantity,
+      receivedQty: 0,
+      status: "Pending",
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+    };
+
+    // Update workflow status
+    const updatedWorkflowItems = workflowItems.map(item => 
+      item.requestId === request.id ? {
+        ...item,
+        currentStatus: "Received",
+        timestamp: new Date().toISOString(),
+        location: "Receiving Area"
+      } : item
+    );
+    setWorkflowItems(updatedWorkflowItems);
+
+    setReceivedItems(prev => [...prev, newReceive]);
+    
+    toast({
+      title: "Item Added for Receiving",
+      description: `Request ${request.id} has been added to receiving list.`,
+    });
+  };
+
+  // Handle changing status of a requested item
+  const handleChangeStatus = (requestId, newStatus) => {
+    // Update the requested items status
+    setRequestedItems(prevItems => {
+      const updatedItems = prevItems.map(item => 
+        item.id === requestId ? { ...item, status: newStatus } : item
+      );
+      // Save to localStorage
+      localStorage.setItem('cssdRequests', JSON.stringify(updatedItems));
+      return updatedItems;
+    });
+
+    // Update workflow status
+    const updatedWorkflowItems = workflowItems.map(item => 
+      item.requestId === requestId ? {
+        ...item,
+        currentStatus: newStatus,
+        timestamp: new Date().toISOString(),
+        location: newStatus === "Completed" ? "Completed" : "Processing"
+      } : item
+    );
+    setWorkflowItems(updatedWorkflowItems);
+    localStorage.setItem('cssdWorkflowItems', JSON.stringify(updatedWorkflowItems));
+    
+    // If status is set to Completed, add to sterilizationProcesses
+    if (newStatus === "Completed") {
+      // Get current sterilization processes
+      const sterilizationProcesses = JSON.parse(localStorage.getItem('sterilizationProcesses') || '[]');
+      // Find the request item for details
+      const requestItem = requestedItems.find(item => item.id === requestId);
+      sterilizationProcesses.push({
+        id: `STE${String(sterilizationProcesses.length + 1).padStart(3, '0')}`,
+        machine: "",
+        process: "",
+        itemId: requestId,
+        startTime: "",
+        endTime: "",
+        status: "Pending",
+        duration: 0,
+        department: requestItem?.department || "",
+        items: requestItem?.items || "",
+        quantity: requestItem?.quantity || 0
+      });
+      localStorage.setItem('sterilizationProcesses', JSON.stringify(sterilizationProcesses));
+      toast({
+        title: "Sent to Sterilization",
+        description: `Request ${requestId} is now ready for sterilization process.`
+      });
+    } else {
+      toast({
+        title: "Status Updated",
+        description: `Request ${requestId} status changed to ${newStatus}.`
+      });
+    }
+  };
+
+  const filteredItems = requestedItems.filter(item => {
     const matchesSearch = item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.requestId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.department.toLowerCase().includes(searchTerm.toLowerCase());
+                         item.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.items.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || item.status.toLowerCase() === statusFilter.toLowerCase();
     return matchesSearch && matchesStatus;
   });
+
+  // Pagination logic for Requested Items
+  const totalPages = Math.ceil(filteredItems.length / requestsPerPage);
+  const indexOfLastRequest = currentPage * requestsPerPage;
+  const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
+  const currentRequests = filteredItems.slice(indexOfFirstRequest, indexOfLastRequest);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   const getStatusIcon = (status) => {
     switch (status) {
       case "Complete":
         return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case "Partial":
+      case "Processing":
         return <Clock className="w-4 h-4 text-yellow-600" />;
+      case "Requested":
+        return <Clock className="w-4 h-4 text-blue-600" />;
       case "Pending":
         return <XCircle className="w-4 h-4 text-red-600" />;
       default:
@@ -149,20 +226,21 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Complete":
+      case "Completed":
         return "bg-green-100 text-green-800";
-      case "Partial":
-        return "bg-yellow-100 text-yellow-800";
+      case "Processing":
+        return "bg-blue-100 text-blue-800";
       case "Pending":
-        return "bg-red-100 text-red-800";
+        return "bg-gray-100 text-gray-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
 
-  const goToStockManagement = () => {
-    navigate('/stock-management');
-  };
+  // Filter requested items that haven't been received yet
+  const unreceivedRequests = requestedItems.filter(request => 
+    !receivedItems.some(received => received.requestId === request.id)
+  );
 
   const filteredPreviousRequests = receivedItems.filter(item => {
     const matchesSearch = item.requestId.toLowerCase().includes(previousRequestSearch.toLowerCase()) ||
@@ -184,58 +262,18 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
             <h1 className="text-xl sm:text-xl font-bold text-gray-900 " style={{color:"#038ba4"}}>Receive Items</h1>
             <p className="text-sm sm:text-base text-gray-600 mt-1">Manage received requests and update status</p>
           </div>
-          
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-[#038ba4] hover:bg-[#038ba4]/90 text-white">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Receive Item
-              </Button>
-              
-            </DialogTrigger>
-            <DialogContent className="bg-white">
-              <DialogHeader>
-                <DialogTitle>Add New Receive Item</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleReceiveItem} className="space-y-4">
-                <div>
-                  <Label htmlFor="requestId">Request ID</Label>
-                  <Input name="requestId" placeholder="Enter request ID" required className="border-gray-300" />
-                </div>
-                <div>
-                  <Label htmlFor="department">Department</Label>
-                  <Input name="department" placeholder="Enter department" required className="border-gray-300" />
-                </div>
-                <div>
-                  <Label htmlFor="items">Items</Label>
-                  <Input name="items" placeholder="Enter items description" required className="border-gray-300" />
-                </div>
-                <div>
-                  <Label htmlFor="quantity">Quantity</Label>
-                  <Input name="quantity" type="number" placeholder="Enter quantity" required className="border-gray-300" />
-                </div>
-                <div>
-                  <Label htmlFor="receivedQty">Received Quantity</Label>
-                  <Input name="receivedQty" type="number" placeholder="Enter received quantity" required className="border-gray-300" />
-                </div>
-                <Button type="submit" className="w-full bg-[#038ba4] hover:bg-[#038ba4]/90 text-white">
-                  Add Item
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
       </div>
 
       <Card className="bg-white border border-gray-200 ">
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
-          <CardTitle className="text-lg sm:text-xl text-gray-900 mb-4">Received Items Management</CardTitle>
+          <CardTitle className="text-lg sm:text-xl text-gray-900 mb-4">Requested Items</CardTitle>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input 
-                placeholder="Search by ID, Request ID, or Department..." 
+                placeholder="Search by Request ID, Department, or Items..." 
                 className="pl-10 border border-gray-300 focus:ring-0 focus:shadow-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -247,9 +285,9 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
               </SelectTrigger>
               <SelectContent className="bg-white">
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="complete">Complete</SelectItem>
-                <SelectItem value="partial">Partial</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="processing">Processing</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -259,70 +297,115 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
             <table className="w-full min-w-[800px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Receipt ID</th>
                   <th className="text-left p-3 text-gray-700 font-medium text-sm">Request ID</th>
                   <th className="text-left p-3 text-gray-700 font-medium text-sm">Department</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Priority</th>
                   <th className="text-left p-3 text-gray-700 font-medium text-sm">Items</th>
-                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Requested Qty</th>
-                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Received Qty</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Quantity</th>
                   <th className="text-left p-3 text-gray-700 font-medium text-sm">Status</th>
-                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Date & Time</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Date</th>
+                  <th className="text-left p-3 text-gray-700 font-medium text-sm">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => (
+                {currentRequests.map((item) => (
                   <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="p-3 font-medium text-gray-900 text-sm">{item.id}</td>
-                    <td className="p-3 text-gray-900 text-sm">{item.requestId}</td>
                     <td className="p-3 text-gray-900 text-sm">{item.department}</td>
+                    <td className="p-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        item.priority === 'High' ? 'bg-red-100 text-red-800' :
+                        item.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {item.priority}
+                      </span>
+                    </td>
                     <td className="p-3 text-gray-900 text-sm">{item.items}</td>
                     <td className="p-3 text-gray-900 text-sm">{item.quantity}</td>
                     <td className="p-3">
-                      <Input 
-                        type="number" 
-                        value={item.receivedQty} 
-                        onChange={(e) => {
-                          const newQty = parseInt(e.target.value) || 0;
-                          const newStatus = newQty === 0 ? "Pending" : 
-                                          newQty < item.quantity ? "Partial" : "Complete";
-                          updateItemStatus(item.id, newStatus, newQty);
-                        }}
-                        className="w-16 sm:w-20 border-gray-300 hover:border-gray-400 focus:border-[#038ba4] text-sm"
-                        min="0"
-                        max={item.quantity}
-                      />
-                    </td>
-                    <td className="p-3">
                       <div className="flex items-center gap-2">
                         {getStatusIcon(item.status)}
-                        <Select 
-                          value={item.status}
-                          onValueChange={(newStatus) => {
-                            handleUpdateStatus(item.id, newStatus);
-                          }}
-                        >
-                          <SelectTrigger className="w-full sm:w-48 border-gray-300 hover:border-gray-400 focus:border-[#038ba4]">
-                            <SelectValue placeholder="Update status" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white">
-                            <SelectItem value="Pending">Pending</SelectItem>
-                            <SelectItem value="Partial">Partial</SelectItem>
-                            <SelectItem value="Complete">Complete</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
+                          {item.status}
+                        </span>
                       </div>
                     </td>
+                    <td className="p-3 text-gray-600 text-sm">{item.date}</td>
                     <td className="p-3">
-                      <div className="text-sm">
-                        <div className="text-gray-900">{item.date}</div>
-                        <div className="text-gray-500 text-xs">{item.time}</div>
-                      </div>
+                      <Select 
+                        value={item.status}
+                        onValueChange={(newStatus) => handleChangeStatus(item.id, newStatus)}
+                      >
+                        <SelectTrigger className="w-32 border-gray-300 text-sm">
+                          <SelectValue placeholder="Change Status" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white">
+                          <SelectItem value="Pending">Pending</SelectItem>
+                          <SelectItem value="Processing">Processing</SelectItem>
+                          <SelectItem value="Completed">Completed</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          {currentRequests.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No requested items found
+            </div>
+          )}
+          
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+              <div className="text-sm text-gray-700">
+                Showing {indexOfFirstRequest + 1} to {Math.min(indexOfLastRequest, filteredItems.length)} of {filteredItems.length} requests
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Previous
+                </Button>
+                
+                {/* Page Numbers */}
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className={
+                        currentPage === page 
+                          ? "bg-[#038ba4] text-white hover:bg-[#027a8f]" 
+                          : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                      }
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -389,36 +472,6 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <Card className="bg-white border border-gray-200">
           <CardHeader className="border-b border-gray-200 p-4">
-            <CardTitle className="flex items-center gap-2 text-green-600 text-base">
-              <CheckCircle className="w-5 h-5" />
-              Complete
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
-              {filteredItems.filter(item => item.status === "Complete").length}
-            </div>
-            <p className="text-xs sm:text-sm text-gray-600">Items fully received</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-gray-200">
-          <CardHeader className="border-b border-gray-200 p-4">
-            <CardTitle className="flex items-center gap-2 text-yellow-600 text-base">
-              <Clock className="w-5 h-5" />
-              Partial
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
-              {filteredItems.filter(item => item.status === "Partial").length}
-            </div>
-            <p className="text-xs sm:text-sm text-gray-600">Partially received items</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-gray-200">
-          <CardHeader className="border-b border-gray-200 p-4">
             <CardTitle className="flex items-center gap-2 text-red-600 text-base">
               <XCircle className="w-5 h-5" />
               Pending
@@ -426,9 +479,39 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardHeader>
           <CardContent className="p-4">
             <div className="text-2xl sm:text-3xl font-bold text-gray-900">
-              {filteredItems.filter(item => item.status === "Pending").length}
+              {requestedItems.filter(item => item.status === "Pending").length}
             </div>
-            <p className="text-xs sm:text-sm text-gray-600">Awaiting receipt</p>
+            <p className="text-xs sm:text-sm text-gray-600">Awaiting processing</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-gray-200">
+          <CardHeader className="border-b border-gray-200 p-4">
+            <CardTitle className="flex items-center gap-2 text-yellow-600 text-base">
+              <Clock className="w-5 h-5" />
+              Processing
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
+              {requestedItems.filter(item => item.status === "Processing").length}
+            </div>
+            <p className="text-xs sm:text-sm text-gray-600">Items being processed</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-gray-200">
+          <CardHeader className="border-b border-gray-200 p-4">
+            <CardTitle className="flex items-center gap-2 text-green-600 text-base">
+              <CheckCircle className="w-5 h-5" />
+              Completed
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
+              {requestedItems.filter(item => item.status === "Completed").length}
+            </div>
+            <p className="text-xs sm:text-sm text-gray-600">Completed requests</p>
           </CardContent>
         </Card>
       </div>
