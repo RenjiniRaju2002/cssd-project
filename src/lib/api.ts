@@ -330,11 +330,15 @@ class CSSDAPI {
     const receivedItems = await this.getReceivedItems();
     const issuedItems = await this.getIssuedItems();
     const stockItems = await this.getStockItems();
+    
+    // Get available items count from localStorage
+    const availableItems = this.getStorage<any>('availableItems');
+    const itemsReadyCount = availableItems ? availableItems.length : 0;
 
     return {
       activeRequests: requests.filter(r => r.status === 'Pending').length,
       sterilizationInProgress: requests.filter(r => r.status === 'Processing').length,
-      itemsReady: receivedItems.filter(r => r.status === 'Fully Received').length,
+      itemsReady: itemsReadyCount,
       lowStockItems: stockItems.filter(s => s.status === 'Low Stock').length,
       totalRequests: requests.length,
       totalReceived: receivedItems.length,
@@ -389,7 +393,8 @@ class CSSDAPI {
         department: 'OR-1',
         items: 'Surgical instruments set',
         quantity: 1,
-        outlet: 'OR-1'
+        outlet: 'OR-1',
+        status: 'Issued'
       });
 
       // Add sample package kits

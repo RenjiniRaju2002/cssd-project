@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import CssdLayout from "./components/layout/CssdLayout";
-
+  
 const queryClient = new QueryClient();
 
 const App = () => (

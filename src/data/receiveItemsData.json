@@ -32,6 +32,17 @@
       "status": "Pending",
       "date": "2024-06-10",
       "time": "12:00"
+    },
+    {
+      "id": "REC003",
+      "requestId": "REQ009",
+      "department": "ICU",
+      "items": "Medical Tools",
+      "quantity": 4,
+      "receivedQty": 0,
+      "status": "Pending",
+      "date": "2024-06-10",
+      "time": "12:00"
     }
   ],
   "workflowItems": [

@@ -56,15 +56,16 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
   const [machines, setMachines] = useState(initialData.machines);
   const sterilizationMethods = initialData.sterilizationMethods;
 
-  const [pendingRequests, setPendingRequests] = useState([]);
+  const [availableRequests, setAvailableRequests] = useState([]);
   const [selectedRequestId, setSelectedRequestId] = useState("");
 
   useEffect(() => {
-    // Load processing requests from localStorage
+    // Load completed requests from localStorage
     const savedRequests = localStorage.getItem('cssdRequests');
     if (savedRequests) {
       const requests = JSON.parse(savedRequests);
-      setPendingRequests(requests.filter(r => r.status === "Processing"));
+      // Include only Completed requests for sterilization
+      setAvailableRequests(requests.filter(r => r.status === "Completed"));
     }
   }, []);
 
@@ -231,6 +232,8 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
     });
   };
 
+
+
   return (
     <>
     <Header sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
@@ -288,14 +291,16 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
                 <Label htmlFor="itemId" className="text-gray-700 text-sm">Item/Request ID</Label>
                 <Select value={selectedRequestId} onValueChange={setSelectedRequestId} required>
                   <SelectTrigger className="border-gray-300 hover:border-gray-400 mt-1 text-black">
-                    <SelectValue placeholder="Select pending request ID" />
+                    <SelectValue placeholder="Select completed request ID" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-0">
-                    {pendingRequests.length === 0 ? (
-                      <SelectItem value="" disabled>No pending requests</SelectItem>
+                    {availableRequests.length === 0 ? (
+                      <SelectItem value="" disabled>No completed requests</SelectItem>
                     ) : (
-                      pendingRequests.map((req) => (
-                        <SelectItem key={req.id} value={req.id}>{req.id}</SelectItem>
+                      availableRequests.map((req) => (
+                        <SelectItem key={req.id} value={req.id}>
+                          {req.id}
+                        </SelectItem>
                       ))
                     )}
                   </SelectContent>
@@ -349,10 +354,13 @@ const SterilizationProcess = ({ sidebarCollapsed, toggleSidebar }) => {
 
       <Card className="bg-white border border-gray-200">
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6">
-          <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
-            <Timer className="w-5 h-5 text-[#038ba4]" />
-            Active Processes
-          </CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
+              <Timer className="w-5 h-5 text-[#038ba4]" />
+              Active Processes
+            </CardTitle>
+         
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">

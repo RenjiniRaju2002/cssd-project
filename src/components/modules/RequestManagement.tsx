@@ -950,7 +950,8 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                     <td className="p-4 text-gray-900">{request.quantity}</td>
                     <td className="p-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        request.status === 'Requested' ? 'bg-gray-100 text-gray-800' :
+
+                        request.status === 'Requested' ? 'bg-gray-300 text-gray-800' :
                         request.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
                         'bg-green-100 text-green-800'
                       }`}>
@@ -1063,7 +1064,7 @@ const RequestManagement = ({ sidebarCollapsed, toggleSidebar }) => {
                 <div>
                   <Label className="text-gray-700">Status</Label>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    selectedRequest.status === 'Requested' ? 'bg-gray-100 text-gray-800' :
+                    selectedRequest.status === 'Requested' ? 'bg-gray-300 text-gray-800' :
                     selectedRequest.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
                     'bg-green-100 text-green-800'
                   }`}>

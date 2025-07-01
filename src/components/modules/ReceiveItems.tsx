@@ -160,26 +160,8 @@ const ReceiveItems = ({ sidebarCollapsed, toggleSidebar }) => {
     
     // If status is set to Completed, add to sterilizationProcesses
     if (newStatus === "Completed") {
-      // Get current sterilization processes
-      const sterilizationProcesses = JSON.parse(localStorage.getItem('sterilizationProcesses') || '[]');
-      // Find the request item for details
-      const requestItem = requestedItems.find(item => item.id === requestId);
-      sterilizationProcesses.push({
-        id: `STE${String(sterilizationProcesses.length + 1).padStart(3, '0')}`,
-        machine: "",
-        process: "",
-        itemId: requestId,
-        startTime: "",
-        endTime: "",
-        status: "Pending",
-        duration: 0,
-        department: requestItem?.department || "",
-        items: requestItem?.items || "",
-        quantity: requestItem?.quantity || 0
-      });
-      localStorage.setItem('sterilizationProcesses', JSON.stringify(sterilizationProcesses));
       toast({
-        title: "Sent to Sterilization",
+        title: "Ready for Sterilization",
         description: `Request ${requestId} is now ready for sterilization process.`
       });
     } else {

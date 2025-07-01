@@ -9,6 +9,7 @@ import StockManagement from "../modules/StockManagement";
 import ConsumptionReports from "../modules/ConsumptionReports";
 import Dashboard from "../modules/Dashboard";
 import { useSidebar } from "@/components/ui/sidebar";
+// import ApiTest from "../modules/ApiTest";
 
 const CssdLayout = () => {
   const { state, toggleSidebar } = useSidebar();
@@ -21,6 +22,7 @@ const CssdLayout = () => {
         <CssdNavbar sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
         <div className="flex-1 bg-background">
           <Routes>
+            {/* <Route path="/api-test" element={<ApiTest />} /> */}
             <Route path="/" element={<Dashboard sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />} />
             <Route path="/request-management" element={<RequestManagement sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />} />
             <Route path="/receive-items" element={<ReceiveItems sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />} />

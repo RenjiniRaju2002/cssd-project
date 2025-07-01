@@ -10,6 +10,18 @@ import Header from "./Header";
 import Footer from "./Footer";
 import initialData from "../../data/issueItemData.json";
 
+interface AvailableItem {
+  id: string;
+  department: string;
+  items: string;
+  quantity: number;
+  status: string;
+  readyTime: string;
+  sterilizationId?: string;
+  machine?: string;
+  process?: string;
+}
+
 const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
   const [issuedItems, setIssuedItems] = useState(() => {
     const savedItems = localStorage.getItem('issuedItems');
@@ -24,6 +36,7 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [completedSterilizedIds, setCompletedSterilizedIds] = useState([]);
   const [sterilizationMap, setSterilizationMap] = useState({});
+  const [availableItems, setAvailableItems] = useState<AvailableItem[]>(initialData.availableItems);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -33,6 +46,14 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
   useEffect(() => {
     localStorage.setItem('issuedItems', JSON.stringify(issuedItems));
   }, [issuedItems]);
+
+  useEffect(() => {
+    localStorage.setItem('availableItems', JSON.stringify(availableItems));
+  }, [availableItems]);
+
+  useEffect(() => {
+    localStorage.setItem('sterilizationMap', JSON.stringify(sterilizationMap));
+  }, [sterilizationMap]);
 
   useEffect(() => {
     // Load pending requests from localStorage
@@ -48,18 +69,41 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
     const savedProcesses = localStorage.getItem('sterilizationProcesses');
     if (savedProcesses) {
       const processes = JSON.parse(savedProcesses);
-      setCompletedSterilizedIds(processes.filter(p => p.status === 'Completed').map(p => p.itemId));
+      const completedProcesses = processes.filter(p => p.status === 'Completed');
+      setCompletedSterilizedIds(completedProcesses.map(p => p.itemId));
+      
       // Build a map of itemId to status
       const map = {};
       processes.forEach(p => { map[p.itemId] = p.status; });
       setSterilizationMap(map);
+      
+      // Create available items from completed sterilization processes
+      const sterilizedItems = completedProcesses.map(process => ({
+        id: process.itemId,
+        department: process.department || "CSSD",
+        items: process.items || process.itemId,
+        quantity: process.quantity || 1,
+        status: "Sterilized",
+        readyTime: process.endTime || new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+        sterilizationId: process.id,
+        machine: process.machine,
+        process: process.process
+      }));
+      
+      // Update available items with sterilized items
+      const updatedAvailableItems = [...initialData.availableItems, ...sterilizedItems];
+      // Remove duplicates based on id
+      const uniqueItems = updatedAvailableItems.filter((item, index, self) => 
+        index === self.findIndex(t => t.id === item.id)
+      );
+      
+      // Update the availableItems state
+      setAvailableItems(uniqueItems);
+      
+      // Save the updated available items to localStorage
+      localStorage.setItem('availableItems', JSON.stringify(uniqueItems));
     }
   }, []);
-
-  const availableItems = initialData.availableItems;
-
-  // Filter availableItems for completed sterilization only
-  const filteredAvailableItems = availableItems.filter(item => completedSterilizedIds.includes(item.id));
 
   const handleIssueItem = (event: React.FormEvent) => {
     event.preventDefault();
@@ -82,6 +126,10 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
     };
 
     setIssuedItems([...issuedItems, newIssue]);
+    
+    // Remove the issued item from available items
+    setAvailableItems(prevItems => prevItems.filter(item => item.id !== requestId));
+    
     toast({
       title: "Item Issued Successfully",
       description: `${newIssue.items} issued to ${outlet}`,
@@ -120,15 +168,15 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
                 <Label htmlFor="requestId" className="text-gray-700">Request ID</Label>
                 <Select name="requestId" required>
                   <SelectTrigger className="border-gray-300 text-black">
-                    <SelectValue placeholder="Select request to issue" />
+                    <SelectValue placeholder="Select sterilized item to issue" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-0">
-                    {pendingRequests.length === 0 ? (
-                      <SelectItem value="" disabled>No pending requests</SelectItem>
+                    {availableItems.length === 0 ? (
+                      <SelectItem value="" disabled>No sterilized items available</SelectItem>
                     ) : (
-                      pendingRequests.map((item) => (
+                      availableItems.map((item) => (
                         <SelectItem key={item.id} value={item.id}>
-                          {item.id} - {item.items} ({item.quantity} units)
+                          {item.id} - {item.items} ({item.quantity} units) - {item.status}
                         </SelectItem>
                       ))
                     )}
@@ -194,16 +242,23 @@ const IssueItem = ({ sidebarCollapsed, toggleSidebar }) => {
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-3 max-h-64 overflow-y-auto">
-              {filteredAvailableItems.map((item) => (
+              {availableItems.map((item) => (
                 <div key={item.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 bg-white">
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="font-medium text-gray-900">{item.id}</h4>
                       <p className="text-sm text-gray-600">{item.items}</p>
                       <p className="text-xs text-gray-500">Qty: {item.quantity} | Ready: {item.readyTime}</p>
+                      {item.sterilizationId && (
+                        <p className="text-xs text-blue-600">Sterilized: {item.machine} - {item.process}</p>
+                      )}
                     </div>
-                    <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                      {sterilizationMap[item.id] || item.status}
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      item.status === "Sterilized" 
+                        ? "bg-green-100 text-green-800" 
+                        : "bg-blue-100 text-blue-800"
+                    }`}>
+                      {item.status}
                     </span>
                   </div>
                 </div>
